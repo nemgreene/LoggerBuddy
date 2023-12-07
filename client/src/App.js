@@ -85,18 +85,18 @@ function App() {
     return children;
   }
 
-  useEffect(() => {
-    const [accessToken, refreshToken, _id] = [
-      localStorage.getItem("accessToken"),
-      localStorage.getItem("refreshToken"),
-      localStorage.getItem("user_id"),
-    ];
-    if (accessToken && refreshToken) {
-      setCredentials((p) => ({ ...p, accessToken, refreshToken, _id }));
-    } else {
-      navigate("/login");
-    }
-  }, [navigate]);
+  // useEffect(() => {
+  //   const [accessToken, refreshToken, _id] = [
+  //     localStorage.getItem("accessToken"),
+  //     localStorage.getItem("refreshToken"),
+  //     localStorage.getItem("user_id"),
+  //   ];
+  //   if (accessToken && refreshToken) {
+  //     setCredentials((p) => ({ ...p, accessToken, refreshToken, _id }));
+  //   } else {
+  //     navigate("/login");
+  //   }
+  // }, [navigate]);
 
   return (
     <div className="appContainer">
