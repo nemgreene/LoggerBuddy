@@ -11,12 +11,7 @@ app.use(cors());
 //import your models
 const PORT = process.env.PORT || 3001;
 
-mongoose.connect(process.env.MONGO_STRING, {
-  useNewUrlParser: true,
-  useFindAndModify: false,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-});
+mongoose.connect(process.env.MONGO_STRING);
 // // using bodyParser to parse JSON bodies into JS objects
 app.use(bodyParser.json({ limit: "5mb" }));
 
