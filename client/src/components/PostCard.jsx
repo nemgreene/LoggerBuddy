@@ -15,12 +15,25 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import AssignmentReturnIcon from "@mui/icons-material/AssignmentReturn";
-
+import EditIcon from "@mui/icons-material/Edit";
+import Modal from "@mui/material/Modal";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Tooltip } from "@mui/material";
+import { Tooltip, Box } from "@mui/material";
 import Pictures from "./Pictures";
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  p: 4,
+};
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -44,6 +57,9 @@ function ContentCard({
   trackedStream,
   changeTrackedStream,
   changeScrollRef,
+  credentials,
+  openEditModal,
+  changeEditPost,
 }) {
   const [expanded, setExpanded] = useState(false);
   const myRef = useRef(null);
@@ -73,17 +89,32 @@ function ContentCard({
           postObj.displayCard ? (
             false
           ) : !trackedStream ? (
-            <Tooltip title="Track This Stream">
-              <IconButton
-                aria-label="follow_stream"
-                onClick={() => {
-                  changeTrackedStream(postObj.streamId);
-                  changeScrollRef(postObj._id);
-                }}
-              >
-                <AccountTreeIcon />
-              </IconButton>
-            </Tooltip>
+            <>
+              {credentials?.accessToken ? (
+                <Tooltip title="Edit Post">
+                  <IconButton
+                    aria-label="follow_stream"
+                    onClick={() => {
+                      changeEditPost(postObj);
+                      openEditModal();
+                    }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                </Tooltip>
+              ) : null}
+              <Tooltip title="Track This Stream">
+                <IconButton
+                  aria-label="follow_stream"
+                  onClick={() => {
+                    changeTrackedStream(postObj.streamId);
+                    changeScrollRef(postObj._id);
+                  }}
+                >
+                  <AccountTreeIcon />
+                </IconButton>
+              </Tooltip>
+            </>
           ) : (
             <Tooltip title="Untrack Stream">
               <IconButton
@@ -111,7 +142,6 @@ function ContentCard({
         <Typography variant="h5" color="text.secondary">
           {postObj.h1}
         </Typography>
-        <br />
         <Typography variant="h6" color="text.secondary">
           {postObj.h2}
         </Typography>
@@ -163,6 +193,9 @@ export default function PostCard({
   trackedStream,
   changeTrackedStream,
   changeScrollRef,
+  credentials,
+  openEditModal,
+  changeEditPost,
 }) {
   return postObj ? (
     <ContentCard
@@ -170,6 +203,9 @@ export default function PostCard({
       trackedStream={trackedStream}
       changeTrackedStream={changeTrackedStream}
       changeScrollRef={changeScrollRef}
+      credentials={credentials}
+      openEditModal={openEditModal}
+      changeEditPost={changeEditPost}
     />
   ) : (
     // skeleton post

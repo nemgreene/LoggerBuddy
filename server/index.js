@@ -39,8 +39,19 @@ app.use(function (req, res, next) {
 app.use(express.static("./uploads"));
 
 const router = require("./routes");
+const protectedRouter = require("./protectedRotues");
+const User = require("./models/User");
 
-app.use(router);
+const authenitcate = async (req, res, next) => {
+  const user = await User.findOne({ _id: req.headers.userid });
+  // if (user.sessionCookie === req.headers.accesstoken) {
+  //   return next();
+  // } else res.status(404).send({ error: "Invalid Credentials" });
+  return next();
+};
+
+app.use("/", router);
+app.use("/admin", authenitcate, protectedRouter);
 
 // Step 1:
 app.use(express.static(path.resolve(__dirname, "../client/build")));

@@ -1,8 +1,22 @@
-import { red, blue, green, purple, yellow } from "@mui/material/colors";
 import axios from "axios";
 const baseUrl = "http://localhost:3001/";
+// const baseUrl = "/";
 export class ApiClient {
-  constructor() {}
+  constructor(
+    credentialsProvider,
+    logoutHandler,
+    modalHandler,
+    redirectHandler,
+    credentialsManager,
+    loadPosts
+  ) {
+    this.credentialsProvider = credentialsProvider;
+    this.logoutHandler = logoutHandler;
+    this.modalHandler = modalHandler;
+    this.redirectHandler = redirectHandler;
+    this.credentialsManager = credentialsManager;
+    this.loadPosts = loadPosts;
+  }
 
   async apiCall(
     method = "get",
@@ -20,7 +34,7 @@ export class ApiClient {
       });
       // trigger modal if success message and successful
       if (successMessage) {
-        //this.modalHandler(res.status, successMessage);
+        this.modalHandler(res.status, successMessage);
       }
       if (callback) {
         // trigger callback if callback and successful
@@ -28,10 +42,10 @@ export class ApiClient {
         try {
           callback(res);
         } catch (err) {
-          // this.modalHandler(
-          //   err?.response?.staus || "404",
-          //   err?.response?.data?.error || "Callback Error"
-          // );
+          this.modalHandler(
+            err?.response?.staus || "404",
+            err?.response?.data?.error || "Callback Error"
+          );
         }
       }
       return res;
@@ -41,13 +55,80 @@ export class ApiClient {
         throw new Error("498");
       }
       // else alery user to error
-      // this.modalHandler(
-      //   err.response?.staus || "404",
-      //   err.response?.data.error || "Sorry something went wrong"
-      // );
-      // this.logoutHandler();
+      this.modalHandler(
+        err.response?.staus || "404",
+        err.response?.data.error || "Sorry something went wrong"
+      );
+      this.logoutHandler();
       return {};
     }
+  }
+
+  // Added to base api call, this method add credentials in the headers of this request
+  // and includes logic for token expiry error
+  async authenticatedCall(method, url, payload, successMessage, callback) {
+    // verify credentials exist
+    const { accessToken, _id } = this.credentialsProvider();
+    if (!accessToken || !_id) {
+      this.redirect("/login");
+      return { message: "Missing Credentials" };
+    }
+    try {
+      // send along the base request with escalated credentials
+      const res = await this.apiCall(
+        method,
+        `admin/${url}`,
+        {
+          headers: {
+            accessToken,
+            userId: _id,
+          },
+          ...payload,
+        },
+        successMessage,
+        callback
+      );
+      return { ...res };
+    } catch (error) {
+      if (error.message === 498) {
+        // token expired
+        const { accessToken, _id } = this.credentialsProvider();
+        // get updated access token based off refresh token
+        const updatedCredentials = await this.apiCall(
+          "get",
+          "/token",
+          {
+            data: {
+              accessToken,
+            },
+            headers: {
+              accessToken,
+            },
+          },
+          successMessage,
+          callback
+        );
+        // extract payload
+        const [updateA] = [updatedCredentials?.data?.accesstoken];
+        // once credentials have been uplaoded, resend request with updated credentials
+        const res = await this.authenticatedCall(method, url, {
+          ...payload,
+          headers: {
+            accessToken: updateA,
+            userId: _id,
+          },
+          successMessage,
+          callback,
+        });
+        return res;
+      }
+      return {};
+    }
+  }
+
+  redirect(url) {
+    // inherited from react-router-dom, exposes a function to redirect programmatically from client
+    this.redirectHandler(url);
   }
 
   async getStreamHeaders(index) {
@@ -74,5 +155,40 @@ export class ApiClient {
         headers: { page },
       });
     }
+  }
+  async login({ email, password }) {
+    return await this.apiCall(
+      "post",
+      `login`,
+      {
+        data: {
+          email,
+          password,
+        },
+      },
+      "Logged In!",
+      undefined
+    );
+  }
+
+  //private routes
+
+  async updatePost(post) {
+    return await this.authenticatedCall(
+      "post",
+      "posts/update",
+      { data: post },
+      "Post Updated!",
+      () => this.loadPosts()
+    );
+  }
+  async deletePost(id) {
+    return await this.authenticatedCall(
+      `delete`,
+      `posts/${id}`,
+      undefined,
+      "Post Deleted!",
+      () => this.loadPosts()
+    );
   }
 }

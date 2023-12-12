@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import { Buffer } from "buffer";
 import PostCard from "./PostCard";
 import { Box, Container } from "@mui/system";
 import Grid from "@mui/material/Grid";
@@ -18,6 +18,7 @@ import DragAndDrop from "./DragAndDrop";
 import Avatar from "@mui/material/Avatar";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import PostForm from "./PostForm";
 
 const darkTheme = createTheme({
   palette: {
@@ -25,9 +26,8 @@ const darkTheme = createTheme({
   },
 });
 
-export default function AdminDashboard({ client }) {
-  const [images, changeImages] = useState();
-  const [streamHeaders, changeStreamHeaders] = useState([]);
+export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
+  const [images, changeImages] = useState([]);
   const [formData, changeFormData] = useState({
     h1: "",
     h2: "",
@@ -46,15 +46,8 @@ export default function AdminDashboard({ client }) {
     posts: [],
   });
 
-  const loadData = async () => {
-    const dbSHeaders = await client.getStreamHeaders();
-    // console.log(dbSHeaders);
-    changeStreamHeaders(dbSHeaders.data ? dbSHeaders.data : []);
-  };
-
   useEffect(() => {
     generateColor();
-    loadData();
   }, []);
 
   const generateColor = () => {
@@ -73,6 +66,9 @@ export default function AdminDashboard({ client }) {
   };
 
   const handleStreamChange = (e) => {
+    if (e.target.value === "-1") {
+      return;
+    }
     if (e.target.value === "add") {
       changeFormData((p) => ({
         ...p,
@@ -88,7 +84,6 @@ export default function AdminDashboard({ client }) {
         streamName: streamHeader.streamName,
         color: streamHeader.color,
       }));
-      console.log(e.target.value);
       changeFormErrors((p) => ({
         ...p,
         streamId: true,
@@ -120,7 +115,7 @@ export default function AdminDashboard({ client }) {
       streamDescription: "",
     });
 
-    loadData();
+    loadStreams();
   };
 
   const submitPost = async () => {
@@ -129,11 +124,10 @@ export default function AdminDashboard({ client }) {
     const optional = "h2 cut";
 
     Object.keys(formData).forEach((v) => {
-      console.log(v);
       if (optional.includes(v)) {
         return;
       }
-      if (formData[v]) {
+      if (!formData[v]) {
         err[v] = false;
       }
     });
@@ -141,6 +135,7 @@ export default function AdminDashboard({ client }) {
     if (formData.streamId == "-1") {
       err.streamId = false;
     }
+    console.log(err);
     changeFormErrors(err);
     if (JSON.stringify(err).includes("false")) {
       return;
@@ -157,7 +152,7 @@ export default function AdminDashboard({ client }) {
       streamId: "-1",
       cut: "",
     });
-    changeImages();
+    changeImages([]);
 
     //
     // changeFormData(checked);
@@ -193,268 +188,170 @@ export default function AdminDashboard({ client }) {
   };
 
   return (
-    <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
-      <div
-        onPaste={(e) => {
-          handlePaste(e);
-        }}
-      >
-        <Box>
-          {/* Display Card */}
-          <Container>
-            <Grid item xs={12}></Grid>
-            <PostCard
-              postObj={{
-                ...formData,
-                h1: formData.h1 ? formData.h1 : "Header",
-                body: formData.body ? formData.body : "Body",
-                cut: formData.cut ? formData.cut : "Cut",
-                images: images,
-              }}
+    <div
+      onPaste={(e) => {
+        handlePaste(e);
+      }}
+    >
+      <Box style={{ height: "100vh" }}>
+        <Grid container alignContent={"center"} height={"100%"}>
+          <Grid
+            className="Parens"
+            item
+            xs={6}
+            container
+            alignItems={"center"}
+            justifyContent={"center"}
+            style={{ height: "fit-content", width: "100%", height: "100%" }}
+          >
+            <PostForm
+              client={client}
+              images={images}
+              changeImages={changeImages}
+              formData={formData}
+              formErrors={formErrors}
+              handleChange={handleChange}
+              handleStreamChange={handleStreamChange}
+              streamHeaders={streamHeaders}
+              submitPost={submitPost}
             />
-          </Container>
-
-          {/* New stream field */}
-          {formData.streamId === "add" ? (
-            <Container sx={{ paddingBottom: "10px" }}>
-              <Card>
-                <CardContent>
-                  <Typography
-                    sx={{ padding: "20px" }}
-                    variant="h5"
-                    component="div"
-                  >
-                    Add Stream
-                  </Typography>
-                  <Grid container alignItems={"center"}>
-                    <Grid item xs={3}>
-                      <TextField
-                        margin="normal"
-                        fullWidth
-                        id="outlined-basic"
-                        label="Stream Name"
-                        variant="outlined"
-                        value={streamForm.streamName}
-                        onInput={(e) => {
-                          handleChange(e, "streamName", true);
-                        }}
-                        //   onFocus={() => {
-                        //     handleFocus("streamName", true);
-                        //   }}
-                      />
-                    </Grid>
-
-                    <Grid item xs={6}>
-                      <CardHeader
-                        avatar={
-                          <Avatar
-                            onClick={() => {
-                              generateColor();
-                            }}
-                            sx={{
-                              cursor: "pointer",
-                              bgcolor: streamForm["color"]
-                                ? streamForm.color
-                                : "red",
-                            }}
-                            aria-label="recipe"
-                          >
-                            {streamForm["streamName"]
-                              ? streamForm.streamName[0]
-                              : "S"}
-                          </Avatar>
-                        }
-
-                        // title={postObj.h1}
-                        // subheader={`Posted: ${
-                        //   postObj["datePosted"]
-                        //     ? postObj.datePosted.toDateString()
-                        //     : new Date().toDateString()
-                        // }`}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        margin="normal"
-                        value={streamForm.streamDescription}
-                        id="outlined-basic"
-                        label="Stream Description"
-                        fullWidth
-                        rows={3}
-                        variant="outlined"
-                        multiline
-                        onInput={(e) => {
-                          handleChange(e, "streamDescription", true);
-                        }}
-                        //   onFocus={() => {
-                        //     handleFocus("streamDescription", true);
-                        //   }}
-                      />
-                    </Grid>
-                    <Grid item xs={9}></Grid>
-                    <Grid item xs={3}>
-                      <Button
-                        sx={{ margin: "10px 0px" }}
-                        variant="outlined"
-                        fullWidth
-                        onClick={() => {
-                          submitStream();
-                        }}
-                      >
-                        Submit
-                      </Button>
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
-            </Container>
-          ) : null}
-
-          {/* Uplaod Images */}
-          <Container>
-            <Card>
-              <CardContent>
-                <DragAndDrop
-                  client={client}
-                  images={images}
-                  changeImages={changeImages}
-                />
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sx={{ marginTop: 2 }}>
-                    <Button
-                      sx={{ padding: 2 }}
-                      variant="contained"
-                      onClick={() => {
-                        changeImages();
-                      }}
-                      color="error"
-                      fullWidth
+          </Grid>
+          <Grid
+            item
+            xs={6}
+            container
+            alignItems={"center"}
+            justifyContent={"center"}
+          >
+            <Container style={{ width: "80%" }}>
+              <Grid item xs={12}></Grid>
+              {/* New stream field */}
+              {formData.streamId === "add" ? (
+                <Card>
+                  <CardContent>
+                    <Typography
+                      sx={{ padding: "20px" }}
+                      variant="h5"
+                      component="div"
                     >
-                      Delete Images
-                    </Button>
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Container>
+                      Add Stream
+                    </Typography>
+                    <Grid container alignItems={"center"}>
+                      <Grid item xs={3}>
+                        <TextField
+                          margin="normal"
+                          fullWidth
+                          id="outlined-basic"
+                          label="Stream Name"
+                          variant="outlined"
+                          value={streamForm.streamName}
+                          onInput={(e) => {
+                            handleChange(e, "streamName", true);
+                          }}
+                          //   onFocus={() => {
+                          //     handleFocus("streamName", true);
+                          //   }}
+                        />
+                      </Grid>
 
-          {/* New Post Field */}
-          <Container>
-            <Card>
-              <CardContent>
-                <Grid container item xs={12}>
-                  <Grid item xs={6}>
-                    <TextField
-                      margin="normal"
-                      error={formErrors.h1 === false}
-                      id="outlined-basic"
-                      label="Header"
-                      variant="outlined"
-                      value={formData.h1}
-                      onInput={(e) => {
-                        handleChange(e, "h1");
-                      }}
-                      // onFocus={() => {
-                      //   handleFocus("h1");
-                      // }}
-                    />
-                    <TextField
-                      margin="normal"
-                      error={formErrors.h2 === false}
-                      value={formData.h2}
-                      id="outlined-basic"
-                      label="SubHeader (optional)"
-                      variant="outlined"
-                      onInput={(e) => {
-                        handleChange(e, "h2");
-                      }}
-                      // onFocus={() => {
-                      //   handleFocus("h2");
-                      // }}
-                    />
-                  </Grid>
-                  <Grid item xs={3}>
-                    <FormControl fullWidth>
-                      <InputLabel
-                        variant="standard"
-                        htmlFor="uncontrolled-native"
-                      >
-                        Stream
-                      </InputLabel>
-                      <NativeSelect
-                        onChange={handleStreamChange}
-                        value={formData.streamId}
-                        error={formErrors.streamId === false}
-                        inputProps={{
-                          name: "stream",
-                          id: "uncontrolled-native",
-                        }}
-                      >
-                        <option value={"-1"}>Choose Stream</option>
-                        {streamHeaders.map((v, k) => (
-                          <option value={v.streamId} key={k}>
-                            {v.streamName}
-                          </option>
-                        ))}
-                        <option value={"add"}>+ New Stream</option>
-                      </NativeSelect>
-                    </FormControl>
-                  </Grid>
-                </Grid>
-                <Grid>
-                  <TextField
-                    margin="normal"
-                    value={formData.body}
-                    error={formErrors.body === false}
-                    id="outlined-basic"
-                    label="Body"
-                    fullWidth
-                    rows={3}
-                    variant="outlined"
-                    multiline
-                    onInput={(e) => {
-                      handleChange(e, "body");
-                    }}
-                    // onFocus={() => {
-                    // handleFocus("body");
-                    // }}
-                  />
-                  <TextField
-                    margin="normal"
-                    error={formErrors.cut === false}
-                    value={formData.cut}
-                    id="outlined-basic"
-                    label="Under the Cut (optional)"
-                    fullWidth
-                    rows={3}
-                    variant="outlined"
-                    multiline
-                    onInput={(e) => {
-                      handleChange(e, "cut");
-                    }}
-                    // onFocus={() => {
-                    // handleFocus("cut");
-                    // }}
-                  />
-                </Grid>
-                <Grid>
-                  <Button
-                    sx={{ margin: "10px 0px" }}
-                    variant="outlined"
-                    fullWidth
-                    onClick={() => {
-                      submitPost();
-                    }}
-                  >
-                    Post
-                  </Button>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Container>
-        </Box>
-      </div>
-    </ThemeProvider>
+                      <Grid item xs={6}>
+                        <CardHeader
+                          avatar={
+                            <Avatar
+                              onClick={() => {
+                                generateColor();
+                              }}
+                              sx={{
+                                cursor: "pointer",
+                                bgcolor: streamForm["color"]
+                                  ? streamForm.color
+                                  : "red",
+                              }}
+                              aria-label="recipe"
+                            >
+                              {streamForm["streamName"]
+                                ? streamForm.streamName[0]
+                                : "S"}
+                            </Avatar>
+                          }
+
+                          // title={postObj.h1}
+                          // subheader={`Posted: ${
+                          //   postObj["datePosted"]
+                          //     ? postObj.datePosted.toDateString()
+                          //     : new Date().toDateString()
+                          // }`}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          margin="normal"
+                          value={streamForm.streamDescription}
+                          id="outlined-basic"
+                          label="Stream Description"
+                          fullWidth
+                          rows={3}
+                          variant="outlined"
+                          multiline
+                          onInput={(e) => {
+                            handleChange(e, "streamDescription", true);
+                          }}
+                          //   onFocus={() => {
+                          //     handleFocus("streamDescription", true);
+                          //   }}
+                        />
+                      </Grid>
+                      <Grid item xs={9}></Grid>
+                      <Grid item xs={3}>
+                        <Button
+                          sx={{ margin: "10px 0px" }}
+                          variant="outlined"
+                          fullWidth
+                          onClick={() => {
+                            submitStream();
+                          }}
+                        >
+                          Submit
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              ) : null}
+
+              <PostCard
+                postObj={{
+                  ...formData,
+                  h1: formData.h1 ? formData.h1 : "Header",
+                  body: formData.body ? formData.body : "Body",
+                  cut: formData.cut ? formData.cut : "Cut",
+                  images: images,
+                }}
+              />
+              <Button
+                sx={{ padding: 2 }}
+                variant="contained"
+                fullWidth
+                onClick={() => {
+                  changeFormData({
+                    h1: "",
+                    h2: "",
+                    body: "",
+                    links: [],
+                    streamName: "",
+                    streamId: "-1",
+                    cut: "",
+                  });
+                  changeImages();
+                  client.redirect("/");
+                }}
+              >
+                Back to Home
+              </Button>
+            </Container>
+          </Grid>
+        </Grid>
+      </Box>
+    </div>
   );
 }

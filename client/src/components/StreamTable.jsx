@@ -3,7 +3,24 @@ import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import PostCard from "./PostCard";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Modal from "@mui/material/Modal";
 import { sortObj } from "./Utility";
+import PostForm from "./PostForm";
+import EditPost from "./EditPost";
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "90vw",
+  bgcolor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  p: 4,
+};
 
 export default function StreamTable({
   streamData,
@@ -12,8 +29,16 @@ export default function StreamTable({
   changeScrollRef,
   scrollRef,
   streamHeaders,
+  credentials,
+  client,
+  loadStreams,
 }) {
   const [sortFunc, setSortFunc] = useState(sortObj.dateDesc);
+  const [open, setOpen] = React.useState(false);
+  const [editPost, changeEditPost] = useState({});
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   const topRef = useRef(null);
 
@@ -29,6 +54,21 @@ export default function StreamTable({
 
   return (
     <Box ref={topRef}>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <EditPost
+            editPost={editPost}
+            streamHeaders={streamHeaders}
+            client={client}
+            loadStreams={loadStreams}
+          />
+        </Box>
+      </Modal>
       <Container>
         <Grid container spacing={2}>
           <Grid item xs={12}>
@@ -43,7 +83,7 @@ export default function StreamTable({
                         trackedStream={trackedStream}
                         changeTrackedStream={changeTrackedStream}
                         postObj={{
-                          h1: `${v.posts} posts`,
+                          h1: `${v.posts} Post${v.posts > 1 ? "s" : ""}`,
                           body: v.streamDescription,
                           h2: "Stream Description: ",
                           color: v.color,
@@ -62,7 +102,11 @@ export default function StreamTable({
               ? streamData.sort(sortFunc.exec).map((postObj, i) => {
                   return (
                     <PostCard
+                      openEditModal={handleOpen}
+                      editPost={editPost}
+                      changeEditPost={changeEditPost}
                       key={i}
+                      credentials={credentials}
                       postObj={postObj}
                       trackedStream={trackedStream}
                       changeTrackedStream={changeTrackedStream}

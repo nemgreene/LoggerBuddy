@@ -6,6 +6,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import MuiAppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
+import { Grid, Button } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
@@ -20,14 +21,10 @@ import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 import BioDrawer from "./BioBar";
 
-export default function HomeDrawer({ client, children, scrollRef }) {
+export default function HomeDrawer({ client, children, credentials }) {
   const theme = useTheme();
   const [open, setOpen] = useState(true);
-  const [drawerWidth, changeDrawerWidth] = useState(240);
-
-  useEffect(() => {
-    changeDrawerWidth(window.innerWidth / 4);
-  }, []);
+  const [drawerWidth, changeDrawerWidth] = useState(window.innerWidth / 4);
 
   const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
     ({ theme, open }) => ({
@@ -97,9 +94,20 @@ export default function HomeDrawer({ client, children, scrollRef }) {
           >
             <SettingsAccessibilityIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Development Logger
           </Typography>
+          {credentials.accessToken ? (
+            <Button
+              variant="contained"
+              color="warning"
+              onClick={() => {
+                client.logoutHandler();
+              }}
+            >
+              Logout
+            </Button>
+          ) : null}
         </Toolbar>
       </AppBar>
 
@@ -125,33 +133,9 @@ export default function HomeDrawer({ client, children, scrollRef }) {
             )}
           </IconButton>
         </DrawerHeader>
-        <List>
-          {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-        <Divider />
-        <List>
-          {["All mail", "Trash", "Spam"].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-        <BioDrawer />
+        <BioDrawer client={client} credentials={credentials} />
       </Drawer>
+
       <Main open={open}>
         <DrawerHeader />
         {children}
