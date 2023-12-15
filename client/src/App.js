@@ -97,7 +97,6 @@ function App() {
 
   const loadStreams = async (index = false) => {
     const dbActiveStream = await client.getStreamHeaders(index);
-    // console.log(dbActiveStream);
     changeStreamHeaders(dbActiveStream.data);
     setPages(
       Math.ceil(
@@ -235,6 +234,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminDashboard
+                  changeStreamHeaders={changeStreamHeaders}
                   client={client}
                   streamHeaders={streamHeaders}
                   loadStreams={loadStreams}

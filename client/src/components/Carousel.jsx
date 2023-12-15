@@ -4,12 +4,6 @@ import Carousel from "react-material-ui-carousel";
 function PictureViewer({ images, index }) {
   return (
     <Carousel
-      onChange={(e) => {
-        console.log(e, "changin");
-      }}
-      next={() => {
-        console.log("next");
-      }}
       className="CarouselWrapper"
       sx={{
         height: "80vh",

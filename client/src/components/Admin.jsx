@@ -20,6 +20,9 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import PostForm from "./PostForm";
 
+import StreamLinksTable from "./StreamLinksTable";
+import moment from "moment";
+
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
@@ -40,11 +43,11 @@ export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
   const [formErrors, changeFormErrors] = useState({});
   const [streamForm, changeStreamForm] = useState({
     streamName: "",
-    streamId: "",
     streamDescription: "",
     color: "",
-    posts: [],
   });
+  const [links, changeLinks] = useState([]);
+  const [editIndex, changeEditIndex] = useState();
 
   useEffect(() => {
     generateColor();
@@ -58,6 +61,7 @@ export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
   };
 
   const handleChange = (e, key, toggle = false) => {
+    changeFormErrors((p) => ({ ...p, [key]: "" }));
     if (!toggle) {
       changeFormData((p) => ({ ...p, [key]: e.target.value }));
     } else {
@@ -91,36 +95,52 @@ export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
     }
   };
 
-  const handleFocus = (key, toggle) => {
-    if (!toggle) {
-      changeFormData((p) => ({ ...p, [key]: "" }));
-    } else {
-      changeStreamForm((p) => ({ ...p, [key]: "" }));
-    }
-  };
-
   const submitStream = async () => {
+    const skip = "streamId";
     //dispatch to make a new stream
-    const { data } = await client.newStream(streamForm);
-    changeFormData((p) => ({
-      ...p,
-      streamId: data.streamId,
-      streamName: data.streamName,
-      color: data.color,
-    }));
-    changeStreamForm({
-      streamName: "",
-      streamId: "",
-      color: `#${Math.random().toString(16).substr(-6)}`,
-      streamDescription: "",
+    const err = {};
+    Object.keys(streamForm).forEach((v) => {
+      if (!streamForm[v] && !skip.includes(v)) {
+        err[v] = false;
+      }
     });
 
-    loadStreams();
+    if (!isNaN(editIndex)) {
+      client.modalHandler(400, "Must complete changes to link");
+      return;
+    }
+
+    if (JSON.stringify(err).includes("false")) {
+      client.modalHandler(400, "Please fill out required fields");
+      changeFormErrors(err);
+      return;
+    }
+
+    const { data } = await client.newStream({ ...streamForm, links });
+    if (data) {
+      changeFormData((p) => ({
+        ...p,
+        streamId: data.streamId,
+        streamName: data.streamName,
+        color: data.color,
+      }));
+      changeStreamForm({
+        streamName: "",
+        streamId: "",
+        color: `#${Math.random().toString(16).substr(-6)}`,
+        streamDescription: "",
+      });
+      changeLinks([]);
+      loadStreams();
+    }
   };
 
   const submitPost = async () => {
     const err = {};
 
+    if (!isNaN(editIndex)) {
+      client.modalHandler(400, "Must complete changes to link");
+    }
     const optional = "h2 cut";
 
     Object.keys(formData).forEach((v) => {
@@ -135,7 +155,6 @@ export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
     if (formData.streamId == "-1") {
       err.streamId = false;
     }
-    console.log(err);
     changeFormErrors(err);
     if (JSON.stringify(err).includes("false")) {
       return;
@@ -143,6 +162,7 @@ export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
     //passed checks, submit
 
     const res = await client.newPost({ ...formData, images });
+    client.modalHandler(200, "Post Created");
     changeFormData({
       h1: "",
       h2: "",
@@ -171,19 +191,6 @@ export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
         changeImages((p) => (p ? [...p, binaryStr] : [binaryStr]));
       };
       reader.readAsArrayBuffer(fileObject);
-      // const file = {
-      //   getRawFile: () => fileObject,
-      //   name: fileObject.name,
-      //   size: fileObject.size,
-      //   uid: guid(),
-      //   status: 2,
-      //   progress: 0,
-      // };
-
-      // const filesState = this.state.files.map((f) => ({ ...f }));
-      // filesState.push(file);
-
-      // this.setState({ files: filesState });
     }
   };
 
@@ -198,23 +205,129 @@ export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
           <Grid
             className="Parens"
             item
-            xs={6}
+            xs={12}
+            lg={6}
             container
             alignItems={"center"}
             justifyContent={"center"}
-            style={{ height: "fit-content", width: "100%", height: "100%" }}
+            style={{ height: "fit-content", height: "100%" }}
           >
-            <PostForm
-              client={client}
-              images={images}
-              changeImages={changeImages}
-              formData={formData}
-              formErrors={formErrors}
-              handleChange={handleChange}
-              handleStreamChange={handleStreamChange}
-              streamHeaders={streamHeaders}
-              submitPost={submitPost}
-            />
+            <Grid item sx={{ width: "90%" }}>
+              {formData.streamId === "add" ? (
+                <Box>
+                  <Container>
+                    <Card>
+                      <CardContent>
+                        <Typography variant="h5" component="div">
+                          Add Stream
+                        </Typography>
+                        <Grid container alignItems={"center"}>
+                          <Grid item xs={3}>
+                            <TextField
+                              margin="normal"
+                              error={formErrors.streamName === false}
+                              fullWidth
+                              id="outlined-basic"
+                              label="Stream Name"
+                              variant="outlined"
+                              value={streamForm.streamName}
+                              onInput={(e) => {
+                                handleChange(e, "streamName", true);
+                              }}
+                              //   onFocus={() => {
+                              //     handleFocus("streamName", true);
+                              //   }}
+                            />
+                          </Grid>
+
+                          <Grid item xs={6}>
+                            <CardHeader
+                              avatar={
+                                <Avatar
+                                  onClick={() => {
+                                    generateColor();
+                                  }}
+                                  sx={{
+                                    cursor: "pointer",
+                                    bgcolor: streamForm["color"]
+                                      ? streamForm.color
+                                      : "red",
+                                  }}
+                                  aria-label="recipe"
+                                >
+                                  {streamForm["streamName"]
+                                    ? streamForm.streamName[0]
+                                    : "S"}
+                                </Avatar>
+                              }
+
+                              // title={postObj.h1}
+                              // subheader={`Posted: ${
+                              //   postObj["datePosted"]
+                              //     ? postObj.datePosted.toDateString()
+                              //     : new Date().toDateString()
+                              // }`}
+                            />
+                          </Grid>
+                          <Grid item xs={12}>
+                            <TextField
+                              margin="normal"
+                              value={streamForm.streamDescription}
+                              id="outlined-basic"
+                              label="Stream Description"
+                              fullWidth
+                              rows={3}
+                              error={formErrors.streamDescription === false}
+                              variant="outlined"
+                              multiline
+                              onInput={(e) => {
+                                handleChange(e, "streamDescription", true);
+                              }}
+                              //   onFocus={() => {
+                              //     handleFocus("streamDescription", true);
+                              //   }}
+                            />
+                          </Grid>
+                          <Grid>
+                            <StreamLinksTable
+                              links={links}
+                              changeLinks={changeLinks}
+                              editIndex={editIndex}
+                              changeEditIndex={changeEditIndex}
+                            />
+                          </Grid>
+                          <Grid item xs={9}></Grid>
+                          <Grid item xs={3}>
+                            <Button
+                              sx={{ margin: "10px 0px" }}
+                              variant="outlined"
+                              fullWidth
+                              onClick={() => {
+                                submitStream();
+                              }}
+                            >
+                              Submit
+                            </Button>
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Container>
+                </Box>
+              ) : (
+                <PostForm
+                  client={client}
+                  images={images}
+                  changeImages={changeImages}
+                  formData={formData}
+                  formErrors={formErrors}
+                  handleChange={handleChange}
+                  handleStreamChange={handleStreamChange}
+                  streamHeaders={streamHeaders}
+                  submitPost={submitPost}
+                />
+              )}
+            </Grid>
           </Grid>
           <Grid
             item
@@ -222,102 +335,11 @@ export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
             container
             alignItems={"center"}
             justifyContent={"center"}
+            sx={{ display: { xs: "none", lg: "flex" } }}
           >
-            <Container style={{ width: "80%" }}>
+            <Container style={{ width: "90%" }}>
               <Grid item xs={12}></Grid>
               {/* New stream field */}
-              {formData.streamId === "add" ? (
-                <Card>
-                  <CardContent>
-                    <Typography
-                      sx={{ padding: "20px" }}
-                      variant="h5"
-                      component="div"
-                    >
-                      Add Stream
-                    </Typography>
-                    <Grid container alignItems={"center"}>
-                      <Grid item xs={3}>
-                        <TextField
-                          margin="normal"
-                          fullWidth
-                          id="outlined-basic"
-                          label="Stream Name"
-                          variant="outlined"
-                          value={streamForm.streamName}
-                          onInput={(e) => {
-                            handleChange(e, "streamName", true);
-                          }}
-                          //   onFocus={() => {
-                          //     handleFocus("streamName", true);
-                          //   }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={6}>
-                        <CardHeader
-                          avatar={
-                            <Avatar
-                              onClick={() => {
-                                generateColor();
-                              }}
-                              sx={{
-                                cursor: "pointer",
-                                bgcolor: streamForm["color"]
-                                  ? streamForm.color
-                                  : "red",
-                              }}
-                              aria-label="recipe"
-                            >
-                              {streamForm["streamName"]
-                                ? streamForm.streamName[0]
-                                : "S"}
-                            </Avatar>
-                          }
-
-                          // title={postObj.h1}
-                          // subheader={`Posted: ${
-                          //   postObj["datePosted"]
-                          //     ? postObj.datePosted.toDateString()
-                          //     : new Date().toDateString()
-                          // }`}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          margin="normal"
-                          value={streamForm.streamDescription}
-                          id="outlined-basic"
-                          label="Stream Description"
-                          fullWidth
-                          rows={3}
-                          variant="outlined"
-                          multiline
-                          onInput={(e) => {
-                            handleChange(e, "streamDescription", true);
-                          }}
-                          //   onFocus={() => {
-                          //     handleFocus("streamDescription", true);
-                          //   }}
-                        />
-                      </Grid>
-                      <Grid item xs={9}></Grid>
-                      <Grid item xs={3}>
-                        <Button
-                          sx={{ margin: "10px 0px" }}
-                          variant="outlined"
-                          fullWidth
-                          onClick={() => {
-                            submitStream();
-                          }}
-                        >
-                          Submit
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              ) : null}
 
               <PostCard
                 postObj={{

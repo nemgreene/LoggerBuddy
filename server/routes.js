@@ -11,6 +11,7 @@ const router = express.Router();
 router.post("/streams/add", async (req, res, next) => {
   try {
     const stream = new Stream({ ...req.body, dateCreated: new Date() });
+    console.log(stream);
     await stream.save();
     const { posts, _id, ...rest } = stream.toObject();
     res.send({ ...rest, streamId: stream._id });
@@ -24,8 +25,14 @@ router.get("/streams/headers", async (req, res, next) => {
     const streams = await Stream.find({});
     // const output = streams.map(({ posts, ...rest }) => rest);
     let ret = streams.map((o) => {
-      const { posts, _id, ...rest } = o.toObject();
-      return { ...rest, streamId: o._id, posts: posts.length };
+      const { posts, _id, links, ...rest } = o.toObject();
+      let stringLinks = links.map((link) => JSON.parse(link));
+      return {
+        ...rest,
+        links: stringLinks,
+        streamId: o._id,
+        posts: posts.length,
+      };
     });
     res.send(ret);
   } catch (e) {

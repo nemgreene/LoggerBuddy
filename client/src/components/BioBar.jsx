@@ -69,9 +69,6 @@ export default function BioDrawer({ client, credentials }) {
       justifyContent={"center"}
       alignContent={"start"}
       style={{ width: "100%", height: "90%" }}
-      onScroll={() => {
-        console.log("scrolling");
-      }}
     >
       <Grid item container justifyContent={"center"} xs={2}>
         {/* <Slider

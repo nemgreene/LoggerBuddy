@@ -17,10 +17,27 @@ export default function App({
   credentials,
   loadStreams,
 }) {
+  const [open, setOpen] = useState(true);
+
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
+
   return (
     <div className="LoggerBuddy">
-      <HomeDrawer client={client} credentials={credentials}>
+      <HomeDrawer
+        client={client}
+        credentials={credentials}
+        open={open}
+        handleDrawerOpen={handleDrawerOpen}
+        handleDrawerClose={handleDrawerClose}
+      >
         <StreamTable
+          drawerOpen={open}
           client={client}
           trackedStream={trackedStream}
           changeTrackedStream={changeTrackedStream}

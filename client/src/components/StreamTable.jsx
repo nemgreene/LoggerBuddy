@@ -9,13 +9,15 @@ import Modal from "@mui/material/Modal";
 import { sortObj } from "./Utility";
 import PostForm from "./PostForm";
 import EditPost from "./EditPost";
+import EditStream from "./EditStream";
+import { Divider } from "@mui/material";
 
 const style = {
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: "90vw",
+  width: "70vw",
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
@@ -61,12 +63,21 @@ export default function StreamTable({
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <EditPost
-            editPost={editPost}
-            streamHeaders={streamHeaders}
-            client={client}
-            loadStreams={loadStreams}
-          />
+          {editPost?.displayCard ? (
+            <EditStream
+              editPost={editPost}
+              streamHeaders={streamHeaders}
+              client={client}
+              loadStreams={loadStreams}
+            />
+          ) : (
+            <EditPost
+              editPost={editPost}
+              streamHeaders={streamHeaders}
+              client={client}
+              loadStreams={loadStreams}
+            />
+          )}
         </Box>
       </Modal>
       <Container>
@@ -81,14 +92,20 @@ export default function StreamTable({
                     <Grid item xs={12} key={i}>
                       <PostCard
                         trackedStream={trackedStream}
+                        credentials={credentials}
+                        changeEditPost={changeEditPost}
+                        openEditModal={handleOpen}
                         changeTrackedStream={changeTrackedStream}
                         postObj={{
                           h1: `${v.posts} Post${v.posts > 1 ? "s" : ""}`,
                           body: v.streamDescription,
                           h2: "Stream Description: ",
+                          datePosted: v.dateCreated,
+                          displayCard: true,
                           color: v.color,
                           streamName: v.streamName,
-                          displayCard: true,
+                          images: [],
+                          stream: v,
                         }}
                       ></PostCard>
                     </Grid>
@@ -107,7 +124,12 @@ export default function StreamTable({
                       changeEditPost={changeEditPost}
                       key={i}
                       credentials={credentials}
-                      postObj={postObj}
+                      postObj={{
+                        ...postObj,
+                        stream: streamHeaders.filter(
+                          (stream) => stream.streamId === postObj.streamId
+                        )[0],
+                      }}
                       trackedStream={trackedStream}
                       changeTrackedStream={changeTrackedStream}
                       changeScrollRef={changeScrollRef}

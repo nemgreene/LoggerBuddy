@@ -8,14 +8,14 @@ export class ApiClient {
     modalHandler,
     redirectHandler,
     credentialsManager,
-    loadPosts
+    loadData
   ) {
     this.credentialsProvider = credentialsProvider;
     this.logoutHandler = logoutHandler;
     this.modalHandler = modalHandler;
     this.redirectHandler = redirectHandler;
     this.credentialsManager = credentialsManager;
-    this.loadPosts = loadPosts;
+    this.loadData = loadData;
   }
 
   async apiCall(
@@ -179,7 +179,17 @@ export class ApiClient {
       "posts/update",
       { data: post },
       "Post Updated!",
-      () => this.loadPosts()
+      () => this.loadData()
+    );
+  }
+  async updateStream(stream) {
+    // console.log(stream);
+    return await this.authenticatedCall(
+      "post",
+      "streams/update",
+      { data: stream },
+      "Stream Updated!",
+      () => this.loadData()
     );
   }
   async deletePost(id) {
@@ -188,7 +198,7 @@ export class ApiClient {
       `posts/${id}`,
       undefined,
       "Post Deleted!",
-      () => this.loadPosts()
+      () => this.loadData()
     );
   }
 }

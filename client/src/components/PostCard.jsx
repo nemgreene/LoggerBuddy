@@ -22,6 +22,7 @@ import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Tooltip, Box } from "@mui/material";
 import Pictures from "./Pictures";
+import { linkIcons } from "./Utility";
 
 const style = {
   position: "absolute",
@@ -86,23 +87,23 @@ function ContentCard({
           </Avatar>
         }
         action={
-          postObj.displayCard ? (
-            false
-          ) : !trackedStream ? (
-            <>
-              {credentials?.accessToken ? (
-                <Tooltip title="Edit Post">
-                  <IconButton
-                    aria-label="follow_stream"
-                    onClick={() => {
-                      changeEditPost(postObj);
-                      openEditModal();
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                </Tooltip>
-              ) : null}
+          <>
+            {credentials?.accessToken ? (
+              <Tooltip title="Edit Post">
+                <IconButton
+                  aria-label="follow_stream"
+                  onClick={() => {
+                    changeEditPost({ ...postObj });
+                    openEditModal();
+                  }}
+                >
+                  <EditIcon />
+                </IconButton>
+              </Tooltip>
+            ) : null}
+            {postObj.displayCard ? (
+              false
+            ) : !trackedStream ? (
               <Tooltip title="Track This Stream">
                 <IconButton
                   aria-label="follow_stream"
@@ -114,19 +115,19 @@ function ContentCard({
                   <AccountTreeIcon />
                 </IconButton>
               </Tooltip>
-            </>
-          ) : (
-            <Tooltip title="Untrack Stream">
-              <IconButton
-                aria-label="all_streams"
-                onClick={() => {
-                  changeTrackedStream(undefined);
-                }}
-              >
-                <AssignmentReturnIcon />
-              </IconButton>
-            </Tooltip>
-          )
+            ) : (
+              <Tooltip title="Untrack Stream">
+                <IconButton
+                  aria-label="all_streams"
+                  onClick={() => {
+                    changeTrackedStream(undefined);
+                  }}
+                >
+                  <AssignmentReturnIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+          </>
         }
         title={postObj["streamName"] ? postObj.streamName : ""}
         subheader={`${postObj.displayCard ? "Created" : "Posted"}: ${
@@ -142,10 +143,14 @@ function ContentCard({
         <Typography variant="h5" color="text.secondary">
           {postObj.h1}
         </Typography>
-        <Typography variant="h6" color="text.secondary">
+        <br />
+        <Typography
+          variant="h6"
+          sx={{ paddingBottom: "7px" }}
+          color="text.secondary"
+        >
           {postObj.h2}
         </Typography>
-        <br />
         <Typography
           style={{ whiteSpace: " pre-line" }}
           variant="body2"
@@ -155,12 +160,18 @@ function ContentCard({
         </Typography>
       </CardContent>
       <CardActions disableSpacing>
-        <IconButton aria-label="add to favorites">
-          <FavoriteIcon />
-        </IconButton>
-        <IconButton aria-label="share">
-          <ShareIcon />
-        </IconButton>
+        {postObj?.stream?.links.map((v, k) => {
+          return (
+            <Tooltip key={k} title={v.tooltip}>
+              <a target="_blank" href={v.url}>
+                <IconButton aria-label={v.tooltip}>
+                  {linkIcons[v.icon]}
+                </IconButton>
+              </a>
+            </Tooltip>
+          );
+        })}
+
         {postObj.cut ? (
           <ExpandMore
             expand={expanded}

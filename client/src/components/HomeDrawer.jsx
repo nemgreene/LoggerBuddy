@@ -21,9 +21,15 @@ import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 import BioDrawer from "./BioBar";
 
-export default function HomeDrawer({ client, children, credentials }) {
+export default function HomeDrawer({
+  client,
+  children,
+  credentials,
+  open,
+  handleDrawerOpen,
+  handleDrawerClose,
+}) {
   const theme = useTheme();
-  const [open, setOpen] = useState(true);
   const [drawerWidth, changeDrawerWidth] = useState(window.innerWidth / 4);
 
   const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
@@ -70,14 +76,6 @@ export default function HomeDrawer({ client, children, credentials }) {
     ...theme.mixins.toolbar,
     justifyContent: "flex-end",
   }));
-
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
 
   return (
     <Box sx={{ display: "flex" }}>

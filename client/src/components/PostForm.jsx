@@ -34,7 +34,7 @@ export default function PostForm({
   children,
 }) {
   return (
-    <Box>
+    <Box sx={{ width: "100%" }}>
       {images && images[0] ? (
         <Container>
           <Card>

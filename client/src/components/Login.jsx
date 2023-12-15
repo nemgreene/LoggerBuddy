@@ -35,7 +35,6 @@ export default function LoginComponent({ client }) {
     }
     const res = await client.login(formValues);
     if (res.status === 200) {
-      console.log(res.data);
       client.credentialsManager(res.data.sessionCookie, res.data._id);
       return client.redirect("/admin");
     }

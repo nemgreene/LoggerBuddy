@@ -93,7 +93,9 @@ export default function Pictures({ images, edit }) {
     return (
       <Grid
         container
-        sx={{ height: `${images.length * 10}vh`, maxHeight: "40vh" }}
+        sx={{
+          minHeight: "20vh",
+        }}
       >
         <Grid item xs={6} sx={{ padding: "5px" }}>
           <DecodedImage index={0} data={images[0]} />
@@ -148,7 +150,11 @@ export default function Pictures({ images, edit }) {
     return (
       <Grid
         container
-        sx={{ height: `${images.length * 20}vh`, maxHeight: "40vh" }}
+        sx={{
+          height: `${Math.ceil(images.length / 3) * 10}vh`,
+          maxHeight: "60vh",
+          minHeight: "20vh",
+        }}
       >
         <Grid item xs={12} container>
           {images.map((img, i) => (

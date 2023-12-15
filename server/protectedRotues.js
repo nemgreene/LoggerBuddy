@@ -4,12 +4,11 @@ const Post = require("./models/Post");
 require("dotenv").config();
 const User = require("./models/User");
 const { uuid } = require("uuidv4");
-const { ObjectId } = require("mongodb");
+const { ObjectId, StreamDescription } = require("mongodb");
 const mongoose = require("mongoose");
 
 const router = express.Router();
 
-//create a new stream
 router.post("/posts/update", async (req, res) => {
   const post = { ...req.body };
   try {
@@ -44,6 +43,27 @@ router.post("/posts/update", async (req, res) => {
     res.status(400).send({ error: "Unable to edit post" });
   }
 });
+
+router.post("/streams/update", async (req, res) => {
+  try {
+    const { streamDescription, dateCreated, links, streamId, ...rest } =
+      req.body;
+    if (!streamDescription || !dateCreated || !links) {
+      throw new Error("Missing Required Fields");
+    }
+    let stringLinks = links.map((link) => JSON.stringify(link));
+
+    const ret = await Stream.findOneAndUpdate(
+      { _id: streamId },
+      { streamDescription, dateCreated, links: stringLinks }
+    );
+    res.status(200).send("Stream Updated");
+  } catch (e) {
+    console.log(e);
+    res.status(400).send({ error: e.message || "Error Updating Post" });
+  }
+});
+
 router.delete("/posts/:id", async (req, res) => {
   let { id } = req.params;
 
