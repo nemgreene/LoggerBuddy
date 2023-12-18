@@ -8,14 +8,14 @@ export class ApiClient {
     modalHandler,
     redirectHandler,
     credentialsManager,
-    loadData
+    loadTaggedData
   ) {
     this.credentialsProvider = credentialsProvider;
     this.logoutHandler = logoutHandler;
     this.modalHandler = modalHandler;
     this.redirectHandler = redirectHandler;
     this.credentialsManager = credentialsManager;
-    this.loadData = loadData;
+    this.loadTaggedData = loadTaggedData;
   }
 
   async apiCall(
@@ -70,7 +70,7 @@ export class ApiClient {
     // verify credentials exist
     const { accessToken, _id } = this.credentialsProvider();
     if (!accessToken || !_id) {
-      this.redirect("/login");
+      this.redirect("/");
       return { message: "Missing Credentials" };
     }
     try {
@@ -131,8 +131,10 @@ export class ApiClient {
     this.redirectHandler(url);
   }
 
-  async getStreamHeaders(index) {
-    return await this.apiCall("get", "streams/headers", { headers: { index } });
+  async getStreamHeaders(streamId = false) {
+    return await this.apiCall("get", "streams/headers", {
+      headers: { streamId },
+    });
   }
   async newStream(newStreamData) {
     const newStream = await this.apiCall("post", "streams/add", {
@@ -179,7 +181,7 @@ export class ApiClient {
       "posts/update",
       { data: post },
       "Post Updated!",
-      () => this.loadData()
+      () => this.loadTaggedData()
     );
   }
   async updateStream(stream) {
@@ -189,7 +191,10 @@ export class ApiClient {
       "streams/update",
       { data: stream },
       "Stream Updated!",
-      () => this.loadData()
+      () => {
+        this.loadTaggedData();
+        this.redirectHandler("/");
+      }
     );
   }
   async deletePost(id) {
@@ -198,7 +203,17 @@ export class ApiClient {
       `posts/${id}`,
       undefined,
       "Post Deleted!",
-      () => this.loadData()
+      () => this.loadTaggedData()
+    );
+  }
+
+  async getTaggedPosts(tags = [], page = 1, trackedStream = undefined) {
+    return await this.apiCall(
+      `post`,
+      `posts/tagged`,
+      { data: { tags, page, trackedStream } }
+      // "Error fetching tagged posts!"
+      // () => this.loadTaggedData()
     );
   }
 }

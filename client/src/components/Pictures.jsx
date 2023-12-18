@@ -1,15 +1,6 @@
 import React from "react";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import {
-  Grid,
-  Typography,
-  Button,
-  Container,
-  Tooltip,
-  Modal,
-  Box,
-  Badge,
-} from "@mui/material";
+import { Grid, Container, Tooltip, Modal, Box, Badge } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import PictureViewer from "./Carousel";
 import ClearIcon from "@mui/icons-material/Clear";

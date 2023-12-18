@@ -1,4 +1,4 @@
-import { Grid, Slider } from "@mui/material";
+import { Grid } from "@mui/material";
 
 import React from "react";
 import FrameA from "../img/1.png";

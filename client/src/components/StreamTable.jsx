@@ -3,14 +3,11 @@ import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import PostCard from "./PostCard";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import { sortObj } from "./Utility";
-import PostForm from "./PostForm";
 import EditPost from "./EditPost";
 import EditStream from "./EditStream";
-import { Divider } from "@mui/material";
+import { Card, CardContent, CardHeader, Typography } from "@mui/material";
 
 const style = {
   position: "absolute",
@@ -33,7 +30,7 @@ export default function StreamTable({
   streamHeaders,
   credentials,
   client,
-  loadStreams,
+  tags,
 }) {
   const [sortFunc, setSortFunc] = useState(sortObj.dateDesc);
   const [open, setOpen] = React.useState(false);
@@ -65,55 +62,65 @@ export default function StreamTable({
         <Box sx={style}>
           {editPost?.displayCard ? (
             <EditStream
+              tags={tags}
               editPost={editPost}
               streamHeaders={streamHeaders}
               client={client}
-              loadStreams={loadStreams}
             />
           ) : (
             <EditPost
               editPost={editPost}
               streamHeaders={streamHeaders}
               client={client}
-              loadStreams={loadStreams}
             />
           )}
         </Box>
       </Modal>
       <Container>
         <Grid container spacing={2}>
-          <Grid item xs={12}>
-            Stream selection
-          </Grid>
-          {trackedStream && streamHeaders
-            ? streamHeaders.map((v, i) => {
-                if (trackedStream === v.streamId) {
-                  return (
-                    <Grid item xs={12} key={i}>
-                      <PostCard
-                        trackedStream={trackedStream}
-                        credentials={credentials}
-                        changeEditPost={changeEditPost}
-                        openEditModal={handleOpen}
-                        changeTrackedStream={changeTrackedStream}
-                        postObj={{
-                          h1: `${v.posts} Post${v.posts > 1 ? "s" : ""}`,
-                          body: v.streamDescription,
-                          h2: "Stream Description: ",
-                          datePosted: v.dateCreated,
-                          displayCard: true,
-                          color: v.color,
-                          streamName: v.streamName,
-                          images: [],
-                          stream: v,
-                        }}
-                      ></PostCard>
-                    </Grid>
-                  );
-                }
-                return null;
-              })
-            : null}
+          {trackedStream && streamHeaders && streamData?.length > 0 ? (
+            streamHeaders.map((v, i) => {
+              if (trackedStream === v.streamId) {
+                return (
+                  <Grid item xs={12} key={i}>
+                    <PostCard
+                      trackedStream={trackedStream}
+                      credentials={credentials}
+                      changeEditPost={changeEditPost}
+                      openEditModal={handleOpen}
+                      changeTrackedStream={changeTrackedStream}
+                      postObj={{
+                        h1: `${v.posts} Post${v.posts > 1 ? "s" : ""}`,
+                        body: v.streamDescription,
+                        h2: "Stream Description: ",
+                        datePosted: v.dateCreated,
+                        displayCard: true,
+                        color: v.color,
+                        streamName: v.streamName,
+                        images: [],
+                        stream: v,
+                      }}
+                    ></PostCard>
+                  </Grid>
+                );
+              }
+              return null;
+            })
+          ) : JSON.stringify(streamData) === "[]" ? (
+            <Grid item xs={12}>
+              <Card sx={{ minWidth: 275 }}>
+                <CardContent>
+                  <Typography
+                    sx={{ fontSize: 14 }}
+                    color="text.secondary"
+                    gutterBottom
+                  >
+                    No Posts match...
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ) : null}
           <Grid item xs={12}>
             {streamData
               ? streamData.sort(sortFunc.exec).map((postObj, i) => {

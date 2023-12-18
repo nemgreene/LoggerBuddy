@@ -1,5 +1,5 @@
 const express = require("express");
-const Stream = require("./models/Stream");
+const Stream = require("./models/StreamV2");
 const Post = require("./models/Post");
 require("dotenv").config();
 const User = require("./models/User");
@@ -46,16 +46,17 @@ router.post("/posts/update", async (req, res) => {
 
 router.post("/streams/update", async (req, res) => {
   try {
-    const { streamDescription, dateCreated, links, streamId, ...rest } =
+    const { streamDescription, dateCreated, links, streamId, tags, ...rest } =
       req.body;
     if (!streamDescription || !dateCreated || !links) {
       throw new Error("Missing Required Fields");
     }
     let stringLinks = links.map((link) => JSON.stringify(link));
 
+    console.log(tags);
     const ret = await Stream.findOneAndUpdate(
       { _id: streamId },
-      { streamDescription, dateCreated, links: stringLinks }
+      { streamDescription, dateCreated, tags, links: stringLinks }
     );
     res.status(200).send("Stream Updated");
   } catch (e) {

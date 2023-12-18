@@ -2,6 +2,7 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
 import HomeIcon from "@mui/icons-material/Home";
 import YouTubeIcon from "@mui/icons-material/YouTube";
+import { createTheme } from "@mui/material/styles";
 
 export const sortObj = {
   dateDesc: {
@@ -28,3 +29,23 @@ export const linkIcons = {
   deploy: <HomeIcon />,
   youtube: <YouTubeIcon />,
 };
+
+export let toastrConfig = {
+  position: "top-right",
+  autoClose: 700,
+  hideProgressBar: false,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+  progress: undefined,
+  theme: "dark",
+};
+export const pageSize = 5;
+
+export const darkTheme = createTheme({
+  palette: {
+    mode: "dark",
+  },
+});
+
+export const drawerWidth = window.innerWidth / 4;
