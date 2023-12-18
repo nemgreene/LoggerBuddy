@@ -5,30 +5,22 @@ import { ApiClient } from "./apiClient";
 import Dashboard from "./components/Dashboard";
 import AdminDashboard from "./components/Admin";
 import LoginComponent from "./components/Login";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import "react-toastify/dist/ReactToastify.css";
+import { toastrConfig, pageSize, darkTheme } from "./components/Utility";
 
 // import LoginComponent from "./components/public/LoginComponent";
 // import RegisterCard from "./components/public/RegisterCard";
-
-let toastrConfig = {
-  position: "top-right",
-  autoClose: 700,
-  hideProgressBar: false,
-  closeOnClick: true,
-  pauseOnHover: true,
-  draggable: true,
-  progress: undefined,
-  theme: "dark",
+const modalHandler = (status, message, config = undefined) => {
+  if (status < 300) {
+    toast.success(message, { ...toastrConfig });
+  } else if (status >= 300 && status < 400) {
+    toast.warning(message, { ...toastrConfig });
+  } else {
+    toast.error(message, { ...toastrConfig });
+  }
 };
-const pageSize = 5;
-
-const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-  },
-});
 
 function App() {
   //#region Routing
@@ -48,22 +40,13 @@ function App() {
   };
 
   const logoutHandler = async () => {
-    // setCredentials({
-    //   accessToken: undefined,
-    //   _id: undefined,
-    // });
+    console.log("logging out");
+    setCredentials({
+      accessToken: undefined,
+      _id: undefined,
+    });
     // localStorage.removeItem("accessToken");
     // localStorage.removeItem("user_id");
-  };
-
-  const modalHandler = (status, message, config = undefined) => {
-    if (status < 300) {
-      toast.success(message, { ...toastrConfig });
-    } else if (status >= 300 && status < 400) {
-      toast.warning(message, { ...toastrConfig });
-    } else {
-      toast.error(message, { ...toastrConfig });
-    }
   };
 
   const redirectHandler = (url) => {
@@ -77,13 +60,13 @@ function App() {
     }
     return children;
   }
-  //#endregion
-
-  //#region Posts
   const [displayPosts, changeDisplayPosts] = useState();
   const [streamHeaders, changeStreamHeaders] = useState([]);
   const [trackedStream, changeTrackedStream] = useState();
+  const [tags, changeTags] = useState([]);
   const [scrollRef, changeScrollRef] = useState();
+  const [storedPage, changeStoredPage] = useState(1);
+  const [activeTags, changeActiveTags] = useState([]);
 
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
@@ -92,31 +75,51 @@ function App() {
     setPage(value);
     changeDisplayPosts();
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-    loadPosts(trackedStream, value);
+    loadTaggedData(value);
   };
 
-  const loadStreams = async (index = false) => {
-    const dbActiveStream = await client.getStreamHeaders(index);
-    changeStreamHeaders(dbActiveStream.data);
+  const loadTaggedData = async (page = 1, reset = false) => {
+    if (reset) {
+      setPage(1);
+      page = 1;
+    }
+
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    const ret = await client.getTaggedPosts(activeTags, page, trackedStream);
+    const { streams, posts } = ret.data;
+    changeDisplayPosts({ posts });
+
     setPages(
       Math.ceil(
-        dbActiveStream.data
-          ? dbActiveStream.data?.reduce((acc, next) => acc + next.posts, 0) /
-              pageSize
+        streams
+          ? streams?.reduce((acc, next) => acc + next.posts, 0) / pageSize
           : 0
       )
     );
   };
 
-  const loadPosts = async (streamIndex = false, page = 1) => {
-    const posts = await client.getPosts(streamIndex, page);
-    changeDisplayPosts({ posts: posts.data });
+  const loadStreams = async (index = trackedStream) => {
+    //setup overhad initialization
+    const dbActiveStream = await client.getStreamHeaders(index);
+    changeStreamHeaders(dbActiveStream.data);
+
+    const uniqueTags = [
+      ...new Set(
+        dbActiveStream.data.reduce((acc, next) => [...acc, ...next.tags], [])
+      ),
+    ];
+    changeTags(uniqueTags);
+
+    const totalPages = Math.ceil(
+      dbActiveStream.data
+        ? dbActiveStream.data?.reduce((acc, next) => acc + next.posts, 0) /
+            pageSize
+        : 0
+    );
+    setPages(totalPages);
   };
 
   useEffect(() => {
-    loadStreams();
-    loadPosts(false, 1);
-
     const [accessToken, _id] = [
       localStorage.getItem("accessToken"),
       localStorage.getItem("user_id"),
@@ -124,29 +127,23 @@ function App() {
     if (accessToken && _id) {
       client.credentialsManager(accessToken, _id);
     }
+    loadStreams();
   }, []);
 
   useEffect(() => {
-    loadPosts(trackedStream);
     if (trackedStream) {
-      streamHeaders.forEach((h) => {
-        if (h.streamId === trackedStream) {
-          setPages(Math.ceil(h.posts / pageSize));
-          return;
-        }
-      });
+      setPage(1);
+      loadTaggedData(1);
     } else {
-      setPages(
-        Math.ceil(
-          streamHeaders
-            ? streamHeaders?.reduce((acc, next) => acc + next.posts, 0) /
-                pageSize
-            : 0
-        )
-      );
+      setPage(storedPage);
+      loadTaggedData(storedPage);
     }
   }, [trackedStream]);
-  //#endregion
+
+  useEffect(() => {
+    setPage(1);
+    loadTaggedData(1);
+  }, [activeTags]);
 
   const client = new ApiClient(
     () => ({
@@ -157,10 +154,7 @@ function App() {
     modalHandler,
     redirectHandler,
     credentialsManager,
-    () => {
-      loadStreams();
-      loadPosts(false, page);
-    }
+    loadTaggedData
   );
 
   // useEffect(() => {
@@ -212,6 +206,9 @@ function App() {
             element={
               // <ProtectedRoute>
               <Dashboard
+                activeTags={activeTags}
+                changeActiveTags={changeActiveTags}
+                tags={tags}
                 page={page}
                 pages={pages}
                 client={client}
@@ -220,11 +217,16 @@ function App() {
                 displayPosts={displayPosts}
                 trackedStream={trackedStream}
                 streamHeaders={streamHeaders}
-                loadStreams={loadStreams}
                 handleChange={handleChange}
                 logoutHandler={logoutHandler}
                 changeScrollRef={changeScrollRef}
-                changeTrackedStream={changeTrackedStream}
+                changeTrackedStream={(e) => {
+                  changeDisplayPosts();
+                  if (!trackedStream) {
+                    changeStoredPage(page);
+                  }
+                  changeTrackedStream(e);
+                }}
               />
               // </ProtectedRoute>
             }
@@ -234,10 +236,10 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminDashboard
+                  tags={tags}
                   changeStreamHeaders={changeStreamHeaders}
                   client={client}
                   streamHeaders={streamHeaders}
-                  loadStreams={loadStreams}
                 />
               </ProtectedRoute>
             }

@@ -1,12 +1,10 @@
 import React, { useState, useRef } from "react";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
-import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import { styled } from "@mui/material/styles";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
-import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import Collapse from "@mui/material/Collapse";
@@ -16,11 +14,8 @@ import Typography from "@mui/material/Typography";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import AssignmentReturnIcon from "@mui/icons-material/AssignmentReturn";
 import EditIcon from "@mui/icons-material/Edit";
-import Modal from "@mui/material/Modal";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Tooltip, Box } from "@mui/material";
+import { Tooltip } from "@mui/material";
 import Pictures from "./Pictures";
 import { linkIcons } from "./Utility";
 

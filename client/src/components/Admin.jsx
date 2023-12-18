@@ -11,25 +11,14 @@ import {
   CardHeader,
   Typography,
 } from "@mui/material";
-import InputLabel from "@mui/material/InputLabel";
-import FormControl from "@mui/material/FormControl";
-import NativeSelect from "@mui/material/NativeSelect";
-import DragAndDrop from "./DragAndDrop";
 import Avatar from "@mui/material/Avatar";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
+import { createTheme } from "@mui/material/styles";
 import PostForm from "./PostForm";
 
 import StreamLinksTable from "./StreamLinksTable";
-import moment from "moment";
+import TagSelect from "./TagSelect";
 
-const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-  },
-});
-
-export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
+export default function AdminDashboard({ client, streamHeaders, tags }) {
   const [images, changeImages] = useState([]);
   const [formData, changeFormData] = useState({
     h1: "",
@@ -48,6 +37,7 @@ export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
   });
   const [links, changeLinks] = useState([]);
   const [editIndex, changeEditIndex] = useState();
+  const [inputTags, changeInputTags] = useState();
 
   useEffect(() => {
     generateColor();
@@ -131,7 +121,6 @@ export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
         streamDescription: "",
       });
       changeLinks([]);
-      loadStreams();
     }
   };
 
@@ -222,7 +211,7 @@ export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
                           Add Stream
                         </Typography>
                         <Grid container alignItems={"center"}>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <TextField
                               margin="normal"
                               error={formErrors.streamName === false}
@@ -240,7 +229,7 @@ export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
                             />
                           </Grid>
 
-                          <Grid item xs={6}>
+                          <Grid item xs={2}>
                             <CardHeader
                               avatar={
                                 <Avatar
@@ -260,13 +249,14 @@ export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
                                     : "S"}
                                 </Avatar>
                               }
-
-                              // title={postObj.h1}
-                              // subheader={`Posted: ${
-                              //   postObj["datePosted"]
-                              //     ? postObj.datePosted.toDateString()
-                              //     : new Date().toDateString()
-                              // }`}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TagSelect
+                              options={tags}
+                              value={inputTags}
+                              setValue={changeInputTags}
+                              label={"Add Stream Tags"}
                             />
                           </Grid>
                           <Grid item xs={12}>
@@ -283,12 +273,9 @@ export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
                               onInput={(e) => {
                                 handleChange(e, "streamDescription", true);
                               }}
-                              //   onFocus={() => {
-                              //     handleFocus("streamDescription", true);
-                              //   }}
                             />
                           </Grid>
-                          <Grid>
+                          <Grid item xs={12}>
                             <StreamLinksTable
                               links={links}
                               changeLinks={changeLinks}
@@ -296,18 +283,38 @@ export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
                               changeEditIndex={changeEditIndex}
                             />
                           </Grid>
-                          <Grid item xs={9}></Grid>
-                          <Grid item xs={3}>
-                            <Button
-                              sx={{ margin: "10px 0px" }}
-                              variant="outlined"
-                              fullWidth
-                              onClick={() => {
-                                submitStream();
-                              }}
-                            >
-                              Submit
-                            </Button>
+                          <Grid
+                            item
+                            xs={12}
+                            container
+                            sx={{ margin: "20px 0px 0px 0px" }}
+                          >
+                            <Grid item xs={4}>
+                              <Button
+                                variant="outlined"
+                                fullWidth
+                                onClick={() => {
+                                  changeFormData((p) => ({
+                                    ...p,
+                                    streamId: "",
+                                  }));
+                                }}
+                              >
+                                Back
+                              </Button>
+                            </Grid>
+                            <Grid item xs={4}></Grid>
+                            <Grid item xs={4}>
+                              <Button
+                                variant="outlined"
+                                fullWidth
+                                onClick={() => {
+                                  submitStream();
+                                }}
+                              >
+                                Submit
+                              </Button>
+                            </Grid>
                           </Grid>
                         </Grid>
                       </CardContent>
@@ -365,6 +372,7 @@ export default function AdminDashboard({ client, streamHeaders, loadStreams }) {
                     cut: "",
                   });
                   changeImages();
+                  client.loadTaggedData(1, true);
                   client.redirect("/");
                 }}
               >

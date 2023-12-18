@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import { useDropzone } from "react-dropzone";
 import Skeleton from "@mui/material/Skeleton";
-import { Grid, Typography, Container, Button } from "@mui/material";
+import { Grid, Typography, Container } from "@mui/material";
 
 const baseStyle = {
   flex: 1,

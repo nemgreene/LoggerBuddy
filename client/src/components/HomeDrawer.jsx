@@ -1,36 +1,33 @@
 import { styled, useTheme } from "@mui/material/styles";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import CssBaseline from "@mui/material/CssBaseline";
 import MuiAppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
-import List from "@mui/material/List";
-import { Grid, Button } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import SettingsAccessibilityIcon from "@mui/icons-material/SettingsAccessibility";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
 import BioDrawer from "./BioBar";
+import TagSelect from "./TagSelect";
+import { drawerWidth } from "./Utility";
+import { Container } from "@mui/system";
 
 export default function HomeDrawer({
   client,
   children,
   credentials,
   open,
+  activeTags,
+  changeActiveTags,
   handleDrawerOpen,
   handleDrawerClose,
+  tags,
 }) {
   const theme = useTheme();
-  const [drawerWidth, changeDrawerWidth] = useState(window.innerWidth / 4);
 
   const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
     ({ theme, open }) => ({
@@ -53,7 +50,10 @@ export default function HomeDrawer({
 
   const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== "open",
-  })(({ theme, open }) => ({
+  })(({ theme, open, subheader }) => ({
+    backgroundColor: subheader
+      ? theme.palette.info.dark
+      : theme.palette.grey.dark,
     transition: theme.transitions.create(["margin", "width"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -92,7 +92,7 @@ export default function HomeDrawer({
           >
             <SettingsAccessibilityIcon />
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}>
             Development Logger
           </Typography>
           {credentials.accessToken ? (
@@ -135,8 +135,80 @@ export default function HomeDrawer({
       </Drawer>
 
       <Main open={open}>
+        {/* <AppBar
+          position="fixed"
+          open={open}
+          subheader="true"
+          sx={{
+            mt: "64px",
+            bgcolor: theme.palette.primary,
+            whiteSpace: "nowrap",
+          }}
+        >
+          <Toolbar sx={{ postion: "absolute", bottom: 0 }}>
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{ flexGrow: 1, padding: "0px 5%" }}
+            >
+              Tags:
+            </Typography>
+
+            <TagSelect
+              options={tags}
+              value={activeTags}
+              setValue={changeActiveTags}
+            />
+          </Toolbar>
+        </AppBar> */}
+        <AppBar
+          position="fixed"
+          open={open}
+          subheader="true"
+          sx={{
+            bgcolor: theme.palette.primary,
+            whiteSpace: "nowrap",
+            // maxHeight: "64px",
+            top: "auto",
+            bottom: 0,
+          }}
+        >
+          <Toolbar>
+            <Grid container sx={{ width: "100%" }}>
+              <Grid
+                item
+                container
+                alignItems={"center"}
+                justifyContent={"right"}
+                xs={2}
+                sx={{ paddingRight: "7px" }}
+              >
+                <Typography
+                  variant="h6"
+                  component="div"
+                  sx={{
+                    textAlign: "right",
+                    padding: "0px 2% 0px 2%",
+                  }}
+                >
+                  Tags:
+                </Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <TagSelect
+                  options={tags}
+                  value={activeTags}
+                  setValue={changeActiveTags}
+                />
+              </Grid>
+            </Grid>
+          </Toolbar>
+        </AppBar>
+
         <DrawerHeader />
         {children}
+        <DrawerHeader />
+        <DrawerHeader />
       </Main>
     </Box>
   );

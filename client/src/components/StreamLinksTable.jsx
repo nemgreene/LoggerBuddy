@@ -14,7 +14,6 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { linkIcons } from "./Utility";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import InputLabel from "@mui/material/InputLabel";
 
 export default function StreamLinksTable({
   links,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Carousel from "react-material-ui-carousel";
 
 function PictureViewer({ images, index }) {

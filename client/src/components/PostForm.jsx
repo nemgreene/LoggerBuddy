@@ -1,24 +1,14 @@
-import React, { Children, useEffect, useState } from "react";
-import { Buffer } from "buffer";
-import PostCard from "./PostCard";
+import React from "react";
 import { Box, Container } from "@mui/system";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Typography,
-} from "@mui/material";
+import { Button, Card, CardContent } from "@mui/material";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import NativeSelect from "@mui/material/NativeSelect";
 import DragAndDrop from "./DragAndDrop";
-import Avatar from "@mui/material/Avatar";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
 import Pictures from "./Pictures";
+import TagSelect from "./TagSelect";
 
 export default function PostForm({
   client,

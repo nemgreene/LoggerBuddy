@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Box, Container } from "@mui/system";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
@@ -8,10 +8,12 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import StreamLinksTable from "./StreamLinksTable";
 import moment from "moment";
+import TagSelect from "./TagSelect";
 
-export default function EditStream({ client, editPost }) {
+export default function EditStream({ client, editPost, tags }) {
   const [formData, changeFormData] = useState(editPost);
   const [formErrors, changeFormErrors] = useState({});
+  const [inputTags, changeTags] = useState(editPost.stream.tags);
   const [links, changeLinks] = useState(editPost.stream.links);
   const [editIndex, changeEditIndex] = useState();
   const [dateCreated, changeDate] = useState(
@@ -46,13 +48,14 @@ export default function EditStream({ client, editPost }) {
     // console.log(formData, links);
 
     // //passed checks, submit
-
-    const res = await client.updateStream({
+    const submit = {
       ...editPost.stream,
       streamDescription: formData.body,
       dateCreated: dateCreated.format(),
+      tags: inputTags,
       links,
-    });
+    };
+    const res = await client.updateStream(submit);
   };
 
   return (
@@ -62,31 +65,43 @@ export default function EditStream({ client, editPost }) {
         <Container>
           <Card>
             <CardContent>
-              <Grid>
-                <TextField
-                  margin="normal"
-                  value={formData.body}
-                  error={formErrors.body === false}
-                  id="outlined-basic"
-                  label="Stream Description"
-                  fullWidth
-                  rows={3}
-                  variant="outlined"
-                  multiline
-                  onInput={(e) => {
-                    handleChange(e, "body");
-                  }}
-                  // onFocus={() => {
-                  // handleFocus("body");
-                  // }}
-                />
+              <Grid container>
+                <Grid item xs={12}>
+                  <TextField
+                    margin="normal"
+                    value={formData.body}
+                    error={formErrors.body === false}
+                    id="outlined-basic"
+                    label="Stream Description"
+                    fullWidth
+                    rows={3}
+                    variant="outlined"
+                    multiline
+                    onInput={(e) => {
+                      handleChange(e, "body");
+                    }}
+                    // onFocus={() => {
+                    // handleFocus("body");
+                    // }}
+                  />
+                </Grid>
+                <Grid item xs={6} sx={{ margin: "10px 0px" }}>
+                  <DatePicker
+                    sx={{ width: "100%" }}
+                    label="Date Created"
+                    value={dateCreated}
+                    onChange={(newValue) => changeDate(newValue)}
+                  />
+                </Grid>
+                <Grid item xs={6} sx={{ margin: "10px 0px" }}>
+                  <TagSelect
+                    label={"Add/Edit Tags"}
+                    value={inputTags}
+                    setValue={changeTags}
+                    options={tags}
+                  />
+                </Grid>
               </Grid>
-              <DatePicker
-                sx={{ margin: "10px 0px" }}
-                label="Date Created"
-                value={dateCreated}
-                onChange={(newValue) => changeDate(newValue)}
-              />
               <Grid>
                 <StreamLinksTable
                   links={links}
