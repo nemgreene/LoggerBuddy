@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Grid, Typography, Container } from "@mui/material";
 
 import React from "react";
 import FrameA from "../img/1.png";
@@ -127,6 +127,45 @@ export default function BioDrawer({ client, credentials }) {
         </Grid>
       </Grid>
       <Grid item xs={2}></Grid>
+      <Container
+        sx={{
+          position: "absolute",
+          mt: "20%",
+          mb: "20%",
+          bottom: 0,
+          height: "fit-content",
+          top: "auto",
+        }}
+      >
+        <Grid container sx={{ padding: "0px 10%" }}>
+          <Grid item>
+            <Typography variant="h6" gutterBottom>
+              Hey, Im Vincent ^
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Typography variant="body2" gutterBottom>
+              This is a tool I've built to help me track my ongoing projects,
+              document my progress, and encourage a Product-Focused approach in
+              my work
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Typography variant="body2" gutterBottom>
+              This project will also offer an opportunity to showcase my
+              different proficiencies across disciplines.
+            </Typography>
+            <br />
+          </Grid>
+          <Grid item>
+            <Typography variant="body2" gutterBottom>
+              I'll be tracking my work as an Instructor for Games Development in
+              Unreal Engine and Full Stack Web Development, my freelance work as
+              an Technical Artist, and my personal projects as an artist.
+            </Typography>
+          </Grid>
+        </Grid>
+      </Container>
     </Grid>
   );
 }

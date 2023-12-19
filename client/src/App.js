@@ -98,16 +98,21 @@ function App() {
       page,
       trackedStream.map((v) => v.streamId)
     );
-    const { streams, posts } = ret.data;
-    changeDisplayPosts({ posts });
+    if (ret.data) {
+      const { streams, posts } = ret.data;
+      changeDisplayPosts({ posts });
 
-    setPages(
-      Math.ceil(
-        streams
-          ? streams?.reduce((acc, next) => acc + next.posts, 0) / pageSize
-          : 0
-      )
-    );
+      setPages(
+        Math.ceil(
+          streams
+            ? streams?.reduce((acc, next) => acc + next.posts, 0) / pageSize
+            : 0
+        )
+      );
+    } else {
+      changeDisplayPosts([]);
+      setPages(1);
+    }
   };
 
   const loadStreams = async (index = trackedStream) => {

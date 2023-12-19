@@ -160,6 +160,7 @@ export default function AdminDashboard({
 
     if (formData.streamId == "-1") {
       err.streamId = false;
+      client.modalHandler(400, "Please select a stream");
     }
     changeFormErrors(err);
     if (JSON.stringify(err).includes("false")) {
