@@ -26,6 +26,13 @@ const modalHandler = (status, message, config = undefined) => {
     toast.error(message, { ...toastrConfig });
   }
 };
+function ProtectedRoute({ redirect = "/", children }) {
+  const accessToken = localStorage.getItem("accessToken");
+  if (!accessToken) {
+    return <Navigate to={redirect} replace />;
+  }
+  return children;
+}
 
 function App() {
   //#region Routing
@@ -50,21 +57,15 @@ function App() {
       accessToken: undefined,
       _id: undefined,
     });
-    // localStorage.removeItem("accessToken");
-    // localStorage.removeItem("user_id");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user_id");
+    modalHandler(200, "Logged out successful");
   };
 
   const redirectHandler = (url) => {
     navigate(url);
   };
 
-  function ProtectedRoute({ redirect = "/", children }) {
-    const accessToken = localStorage.getItem("accessToken");
-    if (!accessToken) {
-      return <Navigate to={redirect} replace />;
-    }
-    return children;
-  }
   const [storedStream, changeStoredStream] = useState({});
   const [displayPosts, changeDisplayPosts] = useState();
   const [streamHeaders, changeStreamHeaders] = useState([]);
