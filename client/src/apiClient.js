@@ -8,7 +8,8 @@ export class ApiClient {
     modalHandler,
     redirectHandler,
     credentialsManager,
-    loadTaggedData
+    loadTaggedData,
+    loadStreams
   ) {
     this.credentialsProvider = credentialsProvider;
     this.logoutHandler = logoutHandler;
@@ -16,6 +17,7 @@ export class ApiClient {
     this.redirectHandler = redirectHandler;
     this.credentialsManager = credentialsManager;
     this.loadTaggedData = loadTaggedData;
+    this.loadStreams = loadStreams;
   }
 
   async apiCall(
@@ -136,19 +138,7 @@ export class ApiClient {
       headers: { streamId },
     });
   }
-  async newStream(newStreamData) {
-    const newStream = await this.apiCall("post", "streams/add", {
-      data: newStreamData,
-    });
-    return newStream;
-  }
 
-  async newPost(newPostData) {
-    const newPost = await this.apiCall("post", "posts/add", {
-      data: newPostData,
-    });
-    return newPost;
-  }
   async getPosts(streamId = false, page = 0) {
     if (!streamId) {
       return await this.apiCall("get", "posts", { headers: { page } });
@@ -158,6 +148,7 @@ export class ApiClient {
       });
     }
   }
+
   async login({ email, password }) {
     return await this.apiCall(
       "post",
@@ -173,7 +164,37 @@ export class ApiClient {
     );
   }
 
+  async getTaggedPosts(tags = [], page = 1, trackedStream = undefined) {
+    return await this.apiCall(
+      `post`,
+      `posts/tagged`,
+      { data: { tags, page, trackedStream } }
+      // "Error fetching tagged posts!"
+      // () => this.loadTaggedData()
+    );
+  }
   //private routes
+
+  async newStream(newStreamData) {
+    return await this.authenticatedCall(
+      "post",
+      "streams/add",
+      {
+        data: newStreamData,
+      },
+      "Stream Updated",
+      () => {
+        this.loadStreams();
+      }
+    );
+  }
+
+  async newPost(newPostData) {
+    const newPost = await this.authenticatedCall("post", "posts/add", {
+      data: newPostData,
+    });
+    return newPost;
+  }
 
   async updatePost(post) {
     return await this.authenticatedCall(
@@ -184,6 +205,7 @@ export class ApiClient {
       () => this.loadTaggedData()
     );
   }
+
   async updateStream(stream) {
     // console.log(stream);
     return await this.authenticatedCall(
@@ -192,11 +214,12 @@ export class ApiClient {
       { data: stream },
       "Stream Updated!",
       () => {
-        this.loadTaggedData();
-        this.redirectHandler("/");
+        // this.loadTaggedData(undefined, true);
+        this.loadStreams();
       }
     );
   }
+
   async deletePost(id) {
     return await this.authenticatedCall(
       `delete`,
@@ -204,16 +227,6 @@ export class ApiClient {
       undefined,
       "Post Deleted!",
       () => this.loadTaggedData()
-    );
-  }
-
-  async getTaggedPosts(tags = [], page = 1, trackedStream = undefined) {
-    return await this.apiCall(
-      `post`,
-      `posts/tagged`,
-      { data: { tags, page, trackedStream } }
-      // "Error fetching tagged posts!"
-      // () => this.loadTaggedData()
     );
   }
 }

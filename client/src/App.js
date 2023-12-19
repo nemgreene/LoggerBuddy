@@ -8,7 +8,12 @@ import LoginComponent from "./components/Login";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import "react-toastify/dist/ReactToastify.css";
-import { toastrConfig, pageSize, darkTheme } from "./components/Utility";
+import {
+  toastrConfig,
+  pageSize,
+  darkTheme,
+  syncTrackedPosts,
+} from "./components/Utility";
 
 // import LoginComponent from "./components/public/LoginComponent";
 // import RegisterCard from "./components/public/RegisterCard";
@@ -60,6 +65,7 @@ function App() {
     }
     return children;
   }
+  const [storedStream, changeStoredStream] = useState({});
   const [displayPosts, changeDisplayPosts] = useState();
   const [streamHeaders, changeStreamHeaders] = useState([]);
   const [trackedStream, changeTrackedStream] = useState([]);
@@ -79,6 +85,7 @@ function App() {
   };
 
   const loadTaggedData = async (page = 1, reset = false) => {
+    console.log("Loading data");
     if (reset) {
       setPage(1);
       page = 1;
@@ -104,19 +111,23 @@ function App() {
 
   const loadStreams = async (index = trackedStream) => {
     //setup overhad initialization
-    const dbActiveStream = await client.getStreamHeaders(index);
-    changeStreamHeaders(dbActiveStream.data);
+    const streamOverhead = await client.getStreamHeaders(index);
+    changeStreamHeaders(streamOverhead.data);
 
+    //if streams are being tracked, this should updated them as well
+    if (trackedStream.length > 0) {
+      syncTrackedPosts(changeTrackedStream, streamOverhead.data);
+    }
     const uniqueTags = [
       ...new Set(
-        dbActiveStream.data.reduce((acc, next) => [...acc, ...next.tags], [])
+        streamOverhead.data.reduce((acc, next) => [...acc, ...next.tags], [])
       ),
     ];
     changeTags(uniqueTags);
 
     const totalPages = Math.ceil(
-      dbActiveStream.data
-        ? dbActiveStream.data?.reduce((acc, next) => acc + next.posts, 0) /
+      streamOverhead.data
+        ? streamOverhead.data?.reduce((acc, next) => acc + next.posts, 0) /
             pageSize
         : 0
     );
@@ -158,7 +169,8 @@ function App() {
     modalHandler,
     redirectHandler,
     credentialsManager,
-    loadTaggedData
+    loadTaggedData,
+    loadStreams
   );
 
   // useEffect(() => {
@@ -244,6 +256,8 @@ function App() {
                   changeStreamHeaders={changeStreamHeaders}
                   client={client}
                   streamHeaders={streamHeaders}
+                  storedStream={storedStream}
+                  changeStoredStream={changeStoredStream}
                 />
               </ProtectedRoute>
             }

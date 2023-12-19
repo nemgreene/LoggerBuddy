@@ -67,7 +67,7 @@ import { drawerWidth } from "./Utility";
 //   }),
 // }));
 
-export default function App({
+export default function Dashboard({
   tags,
   page,
   pages,
