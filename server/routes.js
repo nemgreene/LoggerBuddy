@@ -24,14 +24,14 @@ router.post("/streams/add", async (req, res, next) => {
 //get stream headers
 router.get("/streams/headers", async (req, res, next) => {
   try {
-    let streams;
     const { streamid } = req.headers;
-    if (streamid && streamid === "false") {
-      streams = await Stream.find({});
-    } else {
-      streams = await Stream.find({ _id: streamid });
-    }
-    console.log(streams.length);
+    const streamFilter =
+      streamid.length > 0
+        ? {
+            $or: streamid.map((s) => ({ _id: s.streamId })),
+          }
+        : {};
+    const streams = await Stream.find(streamFilter);
     // const output = streams.map(({ posts, ...rest }) => rest);
     let ret = streams.map((o) => {
       const { posts, _id, links, ...rest } = o.toObject();
@@ -43,7 +43,6 @@ router.get("/streams/headers", async (req, res, next) => {
         posts: posts.length,
       };
     });
-
     res.send(ret);
     return;
   } catch (e) {
@@ -51,22 +50,22 @@ router.get("/streams/headers", async (req, res, next) => {
     res.send(e);
   }
 });
+
 //get stream headers
 router.post("/posts/tagged", async (req, res, next) => {
   try {
     let { tags, page, trackedStream } = req.body;
+
     page -= 1;
 
-    // const taggedStreams = await Stream.find(
-    //   tags.length > 0
-    //     ? {
-    //         $or: tags.map((tags) => ({ tags })),
-    //       }
-    //     : {}
-    // );
-    const trackedFilter = trackedStream
-      ? { _id: new mongoose.Types.ObjectId(trackedStream) }
-      : {};
+    const streamFilter =
+      trackedStream.length > 0
+        ? {
+            $or: trackedStream.map((_id) => ({
+              _id: new mongoose.Types.ObjectId(_id),
+            })),
+          }
+        : {};
 
     const taggedFilter =
       tags.length > 0
@@ -74,17 +73,19 @@ router.post("/posts/tagged", async (req, res, next) => {
             $or: tags.map((tags) => ({ tags })),
           }
         : {};
+
     // const posts = await Post.find(postFilter).sort({ datePosted: -1 });
     // console.log(taggedStreams);
     const taggedStreams = await Stream.aggregate([
       {
         $match: {
-          $and: [taggedFilter, trackedFilter],
+          $and: [taggedFilter, streamFilter],
         },
       },
     ])
       .sort({ datePosted: -1 })
       .exec();
+
     let streams = taggedStreams.map((o) => {
       const { posts, _id, links, ...rest } = o;
       // const { posts, _id, links, ...rest } = o;
@@ -100,11 +101,18 @@ router.post("/posts/tagged", async (req, res, next) => {
       return res.status(200).send({ posts: [], streams: [] });
     }
 
-    const postFilter = trackedStream
-      ? { streamId: new mongoose.Types.ObjectId(trackedStream) }
-      : {};
     // const posts = await Post.find(postFilter).sort({ datePosted: -1 });
     // console.log(taggedStreams);
+
+    const postFilter =
+      trackedStream.length > 0
+        ? {
+            $or: trackedStream.map((_id) => ({
+              streamId: new mongoose.Types.ObjectId(_id),
+            })),
+          }
+        : {};
+
     const postsv2 = await Post.aggregate([
       {
         $match: {
