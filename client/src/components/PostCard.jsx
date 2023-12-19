@@ -98,12 +98,12 @@ function ContentCard({
             ) : null}
             {postObj.displayCard ? (
               false
-            ) : !trackedStream ? (
+            ) : !trackedStream?.length > 0 ? (
               <Tooltip title="Track This Stream">
                 <IconButton
                   aria-label="follow_stream"
                   onClick={() => {
-                    changeTrackedStream(postObj.streamId);
+                    changeTrackedStream([postObj.stream]);
                     changeScrollRef(postObj._id);
                   }}
                 >
@@ -115,7 +115,9 @@ function ContentCard({
                 <IconButton
                   aria-label="all_streams"
                   onClick={() => {
-                    changeTrackedStream(undefined);
+                    changeTrackedStream((p) =>
+                      [...p].filter((s) => s.streamId !== postObj.streamId)
+                    );
                   }}
                 >
                   <AssignmentReturnIcon />

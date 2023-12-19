@@ -104,6 +104,9 @@ export default function App({
         changeActiveTags={changeActiveTags}
         handleDrawerOpen={handleDrawerOpen}
         handleDrawerClose={handleDrawerClose}
+        streamHeaders={streamHeaders}
+        changeTrackedStream={changeTrackedStream}
+        trackedStream={trackedStream}
       >
         <StreamTable
           drawerOpen={open}
@@ -119,13 +122,7 @@ export default function App({
           credentials={credentials}
           tags={tags}
         />
-        {/* <DynamicFooter>
-          <BottomNavigation showLabels>
-            <BottomNavigationAction label="Recents" icon={<RestoreIcon />} />
-            <BottomNavigationAction label="Favorites" icon={<FavoriteIcon />} />
-            <BottomNavigationAction label="Archive" icon={<ArchiveIcon />} />
-          </BottomNavigation>
-        </DynamicFooter> */}
+
         <Grid container>
           <Grid item xs={12} container justifyContent={"center"}>
             <Grid item>

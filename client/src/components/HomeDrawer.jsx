@@ -15,6 +15,7 @@ import BioDrawer from "./BioBar";
 import TagSelect from "./TagSelect";
 import { drawerWidth } from "./Utility";
 import { Container } from "@mui/system";
+import StreamSelect from "./StreamSelect";
 
 export default function HomeDrawer({
   client,
@@ -26,6 +27,9 @@ export default function HomeDrawer({
   handleDrawerOpen,
   handleDrawerClose,
   tags,
+  streamHeaders,
+  changeTrackedStream,
+  trackedStream,
 }) {
   const theme = useTheme();
 
@@ -175,31 +179,45 @@ export default function HomeDrawer({
         >
           <Toolbar>
             <Grid container sx={{ width: "100%" }}>
+              <Grid item xs={1}></Grid>
               <Grid
                 item
                 container
-                alignItems={"center"}
-                justifyContent={"right"}
-                xs={2}
-                sx={{ paddingRight: "7px" }}
+                sx={{
+                  hieght: "100%",
+                  alignItems: "center",
+                  padding: "0px 10px",
+                }}
+                xs={5}
               >
-                <Typography
-                  variant="h6"
-                  component="div"
-                  sx={{
-                    textAlign: "right",
-                    padding: "0px 2% 0px 2%",
-                  }}
-                >
-                  Tags:
-                </Typography>
-              </Grid>
-              <Grid item xs={4}>
                 <TagSelect
                   options={tags}
                   value={activeTags}
                   setValue={changeActiveTags}
+                  label={"Filter posts by tag..."}
                 />
+              </Grid>
+              <Grid
+                item
+                container
+                sx={{
+                  hieght: "100%",
+                  alignItems: "center",
+                  padding: "0px 10px",
+                }}
+                xs={5}
+              >
+                <StreamSelect
+                  options={streamHeaders}
+                  // options={streamHeaders.map((stream) => stream.streamName)}
+
+                  value={trackedStream}
+                  setValue={(e) => {
+                    console.log(e);
+                    changeTrackedStream(e);
+                  }}
+                  label={"Filter posts by Stream..."}
+                ></StreamSelect>
               </Grid>
             </Grid>
           </Toolbar>

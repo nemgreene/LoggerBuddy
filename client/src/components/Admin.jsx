@@ -351,6 +351,7 @@ export default function AdminDashboard({ client, streamHeaders, tags }) {
               <PostCard
                 postObj={{
                   ...formData,
+                  displayCard: true,
                   h1: formData.h1 ? formData.h1 : "Header",
                   body: formData.body ? formData.body : "Body",
                   cut: formData.cut ? formData.cut : "Cut",

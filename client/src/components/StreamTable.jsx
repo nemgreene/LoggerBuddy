@@ -77,34 +77,31 @@ export default function StreamTable({
         </Box>
       </Modal>
       <Container>
-        <Grid container spacing={2}>
+        <Grid container spacing={1}>
           {trackedStream && streamHeaders && streamData?.length > 0 ? (
-            streamHeaders.map((v, i) => {
-              if (trackedStream === v.streamId) {
-                return (
-                  <Grid item xs={12} key={i}>
-                    <PostCard
-                      trackedStream={trackedStream}
-                      credentials={credentials}
-                      changeEditPost={changeEditPost}
-                      openEditModal={handleOpen}
-                      changeTrackedStream={changeTrackedStream}
-                      postObj={{
-                        h1: `${v.posts} Post${v.posts > 1 ? "s" : ""}`,
-                        body: v.streamDescription,
-                        h2: "Stream Description: ",
-                        datePosted: v.dateCreated,
-                        displayCard: true,
-                        color: v.color,
-                        streamName: v.streamName,
-                        images: [],
-                        stream: v,
-                      }}
-                    ></PostCard>
-                  </Grid>
-                );
-              }
-              return null;
+            trackedStream.map((v, i) => {
+              return (
+                <Grid item xs={trackedStream.length === 1 ? 12 : 6} key={i}>
+                  <PostCard
+                    trackedStream={trackedStream}
+                    credentials={credentials}
+                    changeEditPost={changeEditPost}
+                    openEditModal={handleOpen}
+                    changeTrackedStream={changeTrackedStream}
+                    postObj={{
+                      h1: `${v.posts} Post${v.posts > 1 ? "s" : ""}`,
+                      body: v.streamDescription,
+                      h2: "Stream Description: ",
+                      datePosted: v.dateCreated,
+                      displayCard: true,
+                      color: v.color,
+                      streamName: v.streamName,
+                      images: [],
+                      stream: v,
+                    }}
+                  ></PostCard>
+                </Grid>
+              );
             })
           ) : JSON.stringify(streamData) === "[]" ? (
             <Grid item xs={12}>

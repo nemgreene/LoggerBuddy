@@ -62,7 +62,7 @@ function App() {
   }
   const [displayPosts, changeDisplayPosts] = useState();
   const [streamHeaders, changeStreamHeaders] = useState([]);
-  const [trackedStream, changeTrackedStream] = useState();
+  const [trackedStream, changeTrackedStream] = useState([]);
   const [tags, changeTags] = useState([]);
   const [scrollRef, changeScrollRef] = useState();
   const [storedPage, changeStoredPage] = useState(1);
@@ -85,7 +85,11 @@ function App() {
     }
 
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-    const ret = await client.getTaggedPosts(activeTags, page, trackedStream);
+    const ret = await client.getTaggedPosts(
+      activeTags,
+      page,
+      trackedStream.map((v) => v.streamId)
+    );
     const { streams, posts } = ret.data;
     changeDisplayPosts({ posts });
 
@@ -131,7 +135,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (trackedStream) {
+    if (trackedStream.length > 0) {
       setPage(1);
       loadTaggedData(1);
     } else {
