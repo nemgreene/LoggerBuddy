@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 export default function TagSelect({
   value,
   setValue,
-  options,
+  options = [],
   label,
   trackedStream,
 }) {

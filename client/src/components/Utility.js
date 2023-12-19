@@ -49,3 +49,15 @@ export const darkTheme = createTheme({
 });
 
 export const drawerWidth = window.innerWidth / 4;
+
+export const syncTrackedPosts = (changeTrackedStream, streamOverhead) => {
+  changeTrackedStream((p) => {
+    let prev = [...p];
+    prev = prev.map((trackedStream) => {
+      return streamOverhead.filter((so) =>
+        JSON.stringify(trackedStream).includes(so.streamId)
+      )[0];
+    });
+    return prev;
+  });
+};

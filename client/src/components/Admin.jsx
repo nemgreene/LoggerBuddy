@@ -18,30 +18,37 @@ import PostForm from "./PostForm";
 import StreamLinksTable from "./StreamLinksTable";
 import TagSelect from "./TagSelect";
 
-export default function AdminDashboard({ client, streamHeaders, tags }) {
+export default function AdminDashboard({
+  client,
+  streamHeaders,
+  tags,
+  changeStoredStream,
+  storedStream,
+}) {
   const [images, changeImages] = useState([]);
   const [formData, changeFormData] = useState({
     h1: "",
     h2: "",
     body: "",
     links: [],
-    streamName: "",
-    streamId: "-1",
+    streamName: storedStream ? storedStream.streamName : "",
+    streamId: storedStream ? storedStream.streamId : "-1",
     cut: "",
+    color: storedStream
+      ? storedStream.color
+      : `#${Math.random().toString(16).substr(-6)}`,
   });
   const [formErrors, changeFormErrors] = useState({});
   const [streamForm, changeStreamForm] = useState({
     streamName: "",
     streamDescription: "",
-    color: "",
+    color: storedStream
+      ? storedStream.color
+      : `#${Math.random().toString(16).substr(-6)}`,
   });
   const [links, changeLinks] = useState([]);
   const [editIndex, changeEditIndex] = useState();
-  const [inputTags, changeInputTags] = useState();
-
-  useEffect(() => {
-    generateColor();
-  }, []);
+  const [inputTags, changeInputTags] = useState([]);
 
   const generateColor = () => {
     changeStreamForm((p) => ({
@@ -59,10 +66,15 @@ export default function AdminDashboard({ client, streamHeaders, tags }) {
     }
   };
 
+  useEffect(() => {
+    generateColor();
+  }, []);
+
   const handleStreamChange = (e) => {
     if (e.target.value === "-1") {
       return;
     }
+    // changeStoredStream({});
     if (e.target.value === "add") {
       changeFormData((p) => ({
         ...p,
@@ -100,6 +112,7 @@ export default function AdminDashboard({ client, streamHeaders, tags }) {
       return;
     }
 
+    console.log(err);
     if (JSON.stringify(err).includes("false")) {
       client.modalHandler(400, "Please fill out required fields");
       changeFormErrors(err);
@@ -121,6 +134,10 @@ export default function AdminDashboard({ client, streamHeaders, tags }) {
         streamDescription: "",
       });
       changeLinks([]);
+      // console.log(data);
+      changeStoredStream(data);
+      // changeTrackedStream(data);
+      client.loadStreams();
     }
   };
 
@@ -162,6 +179,8 @@ export default function AdminDashboard({ client, streamHeaders, tags }) {
       cut: "",
     });
     changeImages([]);
+    changeStoredStream(res);
+    // client.loadStreams();
 
     //
     // changeFormData(checked);
@@ -373,7 +392,9 @@ export default function AdminDashboard({ client, streamHeaders, tags }) {
                     cut: "",
                   });
                   changeImages();
-                  client.loadTaggedData(1, true);
+                  changeStoredStream({});
+                  client.loadTaggedData();
+                  client.loadStreams();
                   client.redirect("/");
                 }}
               >
