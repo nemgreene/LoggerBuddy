@@ -75,7 +75,6 @@ export default function EditPost({ streamHeaders, client, editPost }) {
 
   const deletePost = async () => {
     const res = await client.deletePost(editPost._id);
-    console.log(res);
   };
 
   const handlePaste = (e) => {
