@@ -162,8 +162,10 @@ export default function AdminDashboard({
       err.streamId = false;
       client.modalHandler(400, "Please select a stream");
     }
-    changeFormErrors(err);
+
     if (JSON.stringify(err).includes("false")) {
+      client.modalHandler(400, JSON.stringify(err));
+      changeFormErrors(err);
       return;
     }
     //passed checks, submit
