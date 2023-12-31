@@ -173,6 +173,11 @@ export class ApiClient {
       // () => this.loadTaggedData()
     );
   }
+
+  //Scrumboard public
+  async getScrumBoard(trackedStream) {
+    return await this.apiCall("get", `scrum/${trackedStream}`);
+  }
   //private routes
 
   async newStream(newStreamData) {
@@ -232,4 +237,121 @@ export class ApiClient {
       }
     );
   }
+
+  //scrumboard Private
+  async addColumns(trackedStream, formData) {
+    return await this.authenticatedCall(
+      "post",
+      "scrum/column/add",
+      {
+        data: { trackedStream, formData },
+      },
+      "Column Added"
+    );
+  }
+  async updateColumns(trackedStream, update) {
+    return await this.authenticatedCall("post", "scrum/column/update", {
+      data: { trackedStream, update },
+    });
+  }
+  // async getScrumBoard(trackedStream) {
+  //   return {
+  //     data: {
+  //       columns: [
+  //         {
+  //           index: 0,
+  //           id: "todo",
+  //           title: "Todo",
+  //           color: "red",
+  //         },
+  //         {
+  //           index: 1,
+  //           id: "doing",
+  //           title: "Work in progress",
+  //           color: "green",
+  //         },
+  //         {
+  //           index: 2,
+  //           id: "done",
+  //           title: "Done",
+  //           color: "blue",
+  //         },
+  //       ],
+  //       items: [
+  //         {
+  //           id: "1",
+  //           columnId: "todo",
+  //           title: "List admin APIs for dashboard",
+  //         },
+  //         {
+  //           id: "2",
+  //           columnId: "todo",
+  //           title:
+  //             "Develop user registration functionality with OTP delivered on SMS after email confirmation and phone number confirmation",
+  //         },
+  //         {
+  //           id: "3",
+  //           columnId: "doing",
+  //           title: "Conduct security testing",
+  //         },
+  //         {
+  //           id: "4",
+  //           columnId: "doing",
+  //           title: "Analyze competitors",
+  //         },
+  //         {
+  //           id: "5",
+  //           columnId: "done",
+  //           title: "Create UI kit documentation",
+  //         },
+  //         {
+  //           id: "6",
+  //           columnId: "done",
+  //           title: "Dev meeting",
+  //         },
+  //         {
+  //           id: "7",
+  //           columnId: "done",
+  //           title: "Deliver dashboard prototype",
+  //           comments: [
+  //             { content: "comment1", date: new Date() },
+  //             { content: "comment1", date: new Date() },
+  //           ],
+  //           links: ["google.com"],
+  //           images: ["an image"],
+  //         },
+  //         {
+  //           id: "8",
+  //           columnId: "todo",
+  //           title: "Optimize application performance",
+  //         },
+  //         {
+  //           id: "9",
+  //           columnId: "todo",
+  //           title: "Implement data validation",
+  //         },
+  //         {
+  //           id: "10",
+  //           columnId: "todo",
+  //           title: "Design database schema",
+  //         },
+  //         {
+  //           id: "11",
+  //           columnId: "todo",
+  //           title: "Integrate SSL web certificates into workflow",
+  //         },
+  //         {
+  //           id: "12",
+  //           columnId: "doing",
+  //           title: "Implement error logging and monitoring",
+  //         },
+  //         {
+  //           id: "13",
+  //           columnId: "doing",
+  //           title: "Design and implement responsive UI",
+  //         },
+  //       ],
+  //     },
+  //   };
+  // }
 }

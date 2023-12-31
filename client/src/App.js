@@ -14,6 +14,7 @@ import {
   darkTheme,
   syncTrackedPosts,
 } from "./components/Utility";
+import ScrumBoard from "./components/pages/ScrumBoard/ScrumBoard";
 
 // import LoginComponent from "./components/public/LoginComponent";
 // import RegisterCard from "./components/public/RegisterCard";
@@ -252,6 +253,10 @@ function App() {
               />
               // </ProtectedRoute>
             }
+          />
+          <Route
+            path="/scrum/:trackedStream"
+            element={<ScrumBoard client={client} credentials={credentials} />}
           />
           <Route
             path="/admin"

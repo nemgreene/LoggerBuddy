@@ -4,6 +4,7 @@ const Stream = require("./models/StreamV2");
 const Post = require("./models/Post");
 require("dotenv").config();
 const User = require("./models/User");
+const Scrum = require("./models/Scrum");
 const { uuid } = require("uuidv4");
 const mongoose = require("mongoose");
 
@@ -148,6 +149,17 @@ router.post("/login", async (req, res) => {
   } else {
     res.status(400).send({ error: "Invalid Credentials" });
   }
+});
+
+//SCRUM BOARD
+router.get("/scrum/:trackedStream", async (req, res) => {
+  const { trackedStream } = req.params;
+  //verify stream exists
+  const scrum = await Scrum.findOne({ streamId: trackedStream });
+  if (!scrum) {
+    return res.status(404).send("No scrum with that id, logging out...");
+  }
+  res.send(scrum);
 });
 
 module.exports = router;

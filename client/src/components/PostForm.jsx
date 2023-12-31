@@ -37,7 +37,7 @@ export default function PostForm({
                     sx={{ padding: 2 }}
                     variant="contained"
                     onClick={() => {
-                      changeImages();
+                      changeImages([]);
                     }}
                     color="error"
                     fullWidth
@@ -65,7 +65,7 @@ export default function PostForm({
                       sx={{ padding: 2 }}
                       variant="contained"
                       onClick={() => {
-                        changeImages();
+                        changeImages([]);
                       }}
                       color="error"
                       fullWidth

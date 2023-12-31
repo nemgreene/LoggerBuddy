@@ -1,6 +1,7 @@
 const express = require("express");
 const Stream = require("./models/StreamV2");
 const Post = require("./models/Post");
+const Scrum = require("./models/Scrum");
 require("dotenv").config();
 const User = require("./models/User");
 const { uuid } = require("uuidv4");
@@ -117,6 +118,49 @@ router.delete("/posts/:id", async (req, res) => {
     console.log(e);
     res.status(400).send({ error: "Error Deleting post..." });
   }
+});
+
+//SCRUM Board
+
+router.post("/scrum/add", async (req, res) => {
+  const { trackedStream } = req.body;
+  //verify stream exists
+  const stream = await Stream.findOne({ _id: trackedStream });
+  if (stream._id != trackedStream) {
+    return res.status(400).send("No stream with that id, logging out...");
+  }
+  //make new scrum
+  const scrum = new Scrum({
+    streamId: trackedStream,
+    columns: [],
+    tasks: [],
+    support: {},
+  });
+  await scrum.save();
+  res.send(scrum);
+});
+router.post("/scrum/column/add", async (req, res) => {
+  const {
+    trackedStream,
+    formData: { name, color, index },
+  } = req.body;
+
+  const id = new mongoose.Types.ObjectId();
+  const ret = await Scrum.findOne({ streamId: trackedStream });
+  ret.columns.push({ id, title: name, color, index: ret.columns.length + 1 });
+  await ret.save();
+
+  res.send(ret.columns);
+});
+router.post("/scrum/column/update", async (req, res) => {
+  const { trackedStream, update } = req.body;
+
+  const ret = await Scrum.findOneAndUpdate(
+    { streamId: trackedStream },
+    { columns: update }
+  );
+
+  res.send(ret);
 });
 
 //random cleanup endpoints

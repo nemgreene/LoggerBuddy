@@ -11,7 +11,7 @@ export default function EditPost({ streamHeaders, client, editPost }) {
   const deleteImage = (id) => {
     let update = [...images];
     update = update.filter((_, i) => i != id);
-    changeImages(update);
+    changeImages(update || []);
   };
 
   const handleChange = (e, key, toggle = false) => {

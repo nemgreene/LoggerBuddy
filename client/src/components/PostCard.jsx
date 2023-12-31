@@ -18,6 +18,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Tooltip } from "@mui/material";
 import Pictures from "./Pictures";
 import { linkIcons } from "./Utility";
+import LogoDevIcon from "@mui/icons-material/LogoDev";
+import { Link } from "react-router-dom";
 
 const style = {
   position: "absolute",
@@ -157,6 +159,14 @@ function ContentCard({
         </Typography>
       </CardContent>
       <CardActions disableSpacing>
+        <Link to={`/scrum/${postObj.streamId}`}>
+          <Tooltip title={"Scrum Board"}>
+            <IconButton aria-label={"Scrum Board"}>
+              <LogoDevIcon />
+            </IconButton>
+          </Tooltip>
+        </Link>
+
         {postObj?.stream?.links.map((v, k) => {
           return (
             <Tooltip key={k} title={v.tooltip}>

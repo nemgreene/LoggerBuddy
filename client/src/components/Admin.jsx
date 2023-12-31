@@ -12,7 +12,6 @@ import {
   Typography,
 } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
-import { createTheme } from "@mui/material/styles";
 import PostForm from "./PostForm";
 
 import StreamLinksTable from "./StreamLinksTable";
@@ -354,7 +353,31 @@ export default function AdminDashboard({
                   handleStreamChange={handleStreamChange}
                   streamHeaders={streamHeaders}
                   submitPost={submitPost}
-                />
+                >
+                  <Button
+                    sx={{ padding: 2 }}
+                    variant="contained"
+                    fullWidth
+                    onClick={() => {
+                      changeFormData({
+                        h1: "",
+                        h2: "",
+                        body: "",
+                        links: [],
+                        streamName: "",
+                        streamId: "-1",
+                        cut: "",
+                      });
+                      changeImages();
+                      changeStoredStream({});
+                      client.loadTaggedData();
+                      client.loadStreams();
+                      client.redirect("/");
+                    }}
+                  >
+                    Back to Home
+                  </Button>
+                </PostForm>
               )}
             </Grid>
           </Grid>
@@ -380,29 +403,6 @@ export default function AdminDashboard({
                   images: images,
                 }}
               />
-              <Button
-                sx={{ padding: 2 }}
-                variant="contained"
-                fullWidth
-                onClick={() => {
-                  changeFormData({
-                    h1: "",
-                    h2: "",
-                    body: "",
-                    links: [],
-                    streamName: "",
-                    streamId: "-1",
-                    cut: "",
-                  });
-                  changeImages();
-                  changeStoredStream({});
-                  client.loadTaggedData();
-                  client.loadStreams();
-                  client.redirect("/");
-                }}
-              >
-                Back to Home
-              </Button>
             </Container>
           </Grid>
         </Grid>
