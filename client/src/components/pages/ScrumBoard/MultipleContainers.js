@@ -18,24 +18,31 @@ import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import { Box, styled } from "@mui/system";
 
 // import { SortableItem } from "./SortableItem";
-import Container from "./Container";
-import { CardContent, Grid, Typography } from "@mui/material";
+import ScrumContainer from "./ScrumContainer";
 import SortableItem from "./SortableItem";
+import ScrumNav from "./ScrumNav";
 
 export default function MultipleContainers({
   openModal,
   columns,
-  items,
+  tasks,
   setColumns,
-  setItems,
+  setTasks,
   client,
   trackedStream,
   credentials,
 }) {
   const [activeColumn, setActiveColumn] = useState(null);
   const [activeTask, setActiveTask] = useState(null);
+  const [hoveredComponent, setHoveredComponent] = useState(null);
 
   const columnSort = useMemo(() => columns.map((col) => col.id), [columns]);
+
+  const { accessToken, _id } = useMemo(
+    () => client.credentialsProvider(),
+    [client]
+  );
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -43,69 +50,90 @@ export default function MultipleContainers({
     })
   );
 
-  const colBoxStyle = { width: "22.22vw" };
-
-  useEffect(() => {}, [columns]);
+  const colBoxStyle = { width: "22.22vw", height: "100%", minWidth: "300px" };
 
   return (
-    <DndContext
-      collisionDetection={closestCenter}
-      sensors={sensors}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      onDragOver={onDragOver}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexWrap: "nowrap",
-          overflowX: "scroll",
-          width: "fit-content",
-        }}
+    <Box>
+      <DndContext
+        collisionDetection={closestCenter}
+        sensors={sensors}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        onDragOver={onDragOver}
       >
-        <SortableContext
-          items={columnSort}
-          strategy={horizontalListSortingStrategy}
-          modifiers={[restrictToHorizontalAxis]}
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "nowrap",
+            overflowX: "scroll",
+            width: "fit-content",
+            height: "90vh",
+            m: "5px 0px",
+          }}
         >
-          {columns.map((col, index) => (
-            <Box sx={{ ...colBoxStyle }} key={col.id} id={col.id}>
-              <Container
-                credentials={credentials}
+          <SortableContext
+            items={columnSort}
+            strategy={horizontalListSortingStrategy}
+            modifiers={[restrictToHorizontalAxis]}
+          >
+            {columns.map((col, index) => (
+              <Box sx={{ ...colBoxStyle }} key={col.id} id={col.id}>
+                <ScrumContainer
+                  client={client}
+                  hoveredComponent={hoveredComponent}
+                  setHoveredComponent={setHoveredComponent}
+                  credentials={credentials}
+                  openModal={openModal}
+                  col={col}
+                  key={col.id}
+                  id={col.id}
+                  active={activeColumn !== null || activeTask !== null}
+                  tasks={tasks.filter((item) => {
+                    return item.columnId == col.id;
+                  })}
+                />
+              </Box>
+            ))}
+          </SortableContext>
+          {accessToken && _id && (
+            <Box sx={{ ...colBoxStyle, height: "100%" }}>
+              <ScrumContainer
+                tasks={[]}
+                col={[]}
+                addCol={true}
                 openModal={openModal}
-                col={col}
-                key={col.id}
-                id={col.id}
-                active={activeColumn !== null || activeTask !== null}
-                items={items.filter((item) => item.columnId === col.id)}
+                client={client}
               />
-              {/* <Container key={item.id} column={item} /> */}
             </Box>
-            // <SortableItem key={id} id={id} />
-          ))}
-        </SortableContext>
-        <Box sx={{ ...colBoxStyle }}>
-          <Container items={[]} col={[]} addCol={true} openModal={openModal} />
+          )}
         </Box>
-      </Box>
-      <DragOverlay>
-        {activeColumn && (
-          <Box sx={{ ...colBoxStyle }}>
-            <Container
-              overlay={true}
-              col={columns[columns.findIndex((x) => x.id === activeColumn)]}
-              key={activeColumn.id}
-              id={activeColumn.id}
-              items={items.filter((item) => item.columnId === activeColumn)}
-            ></Container>
-          </Box>
-        )}
-        {activeTask && <SortableItem task={activeTask} />}
-      </DragOverlay>
-    </DndContext>
+        <DragOverlay>
+          {activeColumn && (
+            <Box sx={{ ...colBoxStyle }}>
+              <ScrumContainer
+                client={client}
+                hoveredComponent={hoveredComponent}
+                setHoveredComponent={setHoveredComponent}
+                overlay={true}
+                col={columns[columns.findIndex((x) => x.id === activeColumn)]}
+                key={activeColumn.id}
+                id={activeColumn.id}
+                tasks={tasks.filter((item) => item.columnId === activeColumn)}
+              ></ScrumContainer>
+            </Box>
+          )}
+          {activeTask && (
+            <SortableItem client={client} task={activeTask} overlay={true} />
+          )}
+        </DragOverlay>
+      </DndContext>
+    </Box>
   );
 
   async function onDragStart(event) {
+    // if (!accessToken || !_id) {
+    //   return;
+    // }
     if (event.active.data.current?.type === "Column") {
       setActiveColumn(event.active.data.current.column);
       return;
@@ -118,6 +146,9 @@ export default function MultipleContainers({
   }
 
   async function onDragEnd(event) {
+    // if (!accessToken || !_id) {
+    //   return;
+    // }
     setActiveColumn(null);
     setActiveTask(null);
 
@@ -148,6 +179,9 @@ export default function MultipleContainers({
   }
 
   function onDragOver(event) {
+    // if (!accessToken || !_id) {
+    //   return;
+    // }
     const { active, over } = event;
     if (!over) return;
 
@@ -163,7 +197,7 @@ export default function MultipleContainers({
 
     // Im dropping a Task over another Task
     if (isActiveATask && isOverATask) {
-      setItems((tasks) => {
+      setTasks((tasks) => {
         const activeIndex = tasks.findIndex((t) => t.id === activeId);
         const overIndex = tasks.findIndex((t) => t.id === overId);
 
@@ -181,7 +215,7 @@ export default function MultipleContainers({
 
     // Im dropping a Task over a column
     if (isActiveATask && isOverAColumn) {
-      setItems((tasks) => {
+      setTasks((tasks) => {
         const activeIndex = tasks.findIndex((t) => t.id === activeId);
 
         tasks[activeIndex].columnId = overId;

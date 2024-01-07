@@ -53,14 +53,14 @@ function App() {
   };
 
   const logoutHandler = async () => {
-    console.log("logging out");
-    setCredentials({
-      accessToken: undefined,
-      _id: undefined,
-    });
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user_id");
-    modalHandler(200, "Logged out successful");
+    // console.log("logging out");
+    // setCredentials({
+    //   accessToken: undefined,
+    //   _id: undefined,
+    // });
+    // localStorage.removeItem("accessToken");
+    // localStorage.removeItem("user_id");
+    // modalHandler(200, "Logged out successful");
   };
 
   const redirectHandler = (url) => {

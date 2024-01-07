@@ -45,7 +45,6 @@ export default function EditStream({ client, editPost, tags }) {
       client.modalHandler(400, "Accept changes before Submitting");
       return;
     }
-    // console.log(formData, links);
 
     // //passed checks, submit
     const submit = {

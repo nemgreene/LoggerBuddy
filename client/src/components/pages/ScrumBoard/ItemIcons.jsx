@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import InsertCommentIcon from "@mui/icons-material/InsertComment";
 import ReadMoreIcon from "@mui/icons-material/ReadMore";
 import EditIcon from "@mui/icons-material/Edit";
@@ -7,10 +7,12 @@ import { Tooltip, Grid, Typography } from "@mui/material";
 
 export default function ItemIcons({
   task,
-  active,
-  mouseIsOver,
+  hoveredComponent,
   openModal,
   display,
+  isDragging,
+  col,
+  client,
 }) {
   const CGrid = (props) => (
     <Grid
@@ -30,6 +32,7 @@ export default function ItemIcons({
       {props.children}
     </Grid>
   );
+
   return (
     <Grid container columns={10}>
       <Grid item xs={8}>
@@ -41,7 +44,7 @@ export default function ItemIcons({
                   height: "fitContent",
                 }}
                 onClick={() => {
-                  openModal();
+                  openModal({ name: "ViewItem", task });
                 }}
               />
             </Tooltip>
@@ -61,9 +64,9 @@ export default function ItemIcons({
                 <CGrid>
                   <InsertCommentIcon
                     fontSize="tiny"
-                    onClick={() => {
-                      openModal();
-                    }}
+                    // onClick={() => {
+                    //   openModal();
+                    // }}
                   />
                   <Typography
                     whiteSpace={"nowrap"}
@@ -78,22 +81,34 @@ export default function ItemIcons({
           )}
         </Grid>
       </Grid>
-      {mouseIsOver && !active ? (
-        <Grid item xs={2}>
-          <Grid item xs={12} container columns={2}>
-            <CGrid item xs={1}>
-              <Tooltip title="Edit Task">
-                <EditIcon fontSize="small" />
-              </Tooltip>
-            </CGrid>
-            <CGrid item xs={1}>
-              <Tooltip title="Delete Task">
-                <DeleteIcon fontSize="small" />
-              </Tooltip>
-            </CGrid>
+      {hoveredComponent === task.id &&
+        !isDragging &&
+        client.credentialsProvider().accessToken && (
+          <Grid item xs={2}>
+            <Grid item xs={12} container columns={2}>
+              <CGrid item xs={1}>
+                <Tooltip
+                  title="Edit Task"
+                  onClick={() => {
+                    openModal({ name: "EditItem", task, col });
+                  }}
+                >
+                  <EditIcon fontSize="small" />
+                </Tooltip>
+              </CGrid>
+              <CGrid item xs={1}>
+                <Tooltip title="Delete Task">
+                  <DeleteIcon
+                    fontSize="small"
+                    onClick={() => {
+                      openModal({ name: "DeleteItem", task, col });
+                    }}
+                  />
+                </Tooltip>
+              </CGrid>
+            </Grid>
           </Grid>
-        </Grid>
-      ) : null}
+        )}
     </Grid>
   );
 }

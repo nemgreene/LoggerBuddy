@@ -239,7 +239,7 @@ export class ApiClient {
   }
 
   //scrumboard Private
-  async addColumns(trackedStream, formData) {
+  async addColumn(trackedStream, formData) {
     return await this.authenticatedCall(
       "post",
       "scrum/column/add",
@@ -249,10 +249,66 @@ export class ApiClient {
       "Column Added"
     );
   }
+  async editColumn(trackedStream, _id, formData) {
+    return await this.authenticatedCall(
+      "post",
+      "scrum/column/edit",
+      {
+        data: { trackedStream, _id, formData },
+      },
+      "Column Updated"
+    );
+  }
+  async deleteColumns(id) {
+    return await this.authenticatedCall(
+      "delete",
+      `scrum/column/${id}`,
+      undefined,
+      "Column Deleted"
+    );
+  }
+
+  //sync server sort order with frontend source of truth
   async updateColumns(trackedStream, update) {
-    return await this.authenticatedCall("post", "scrum/column/update", {
+    return await this.authenticatedCall("post", "scrum/column/sync", {
       data: { trackedStream, update },
     });
+  }
+
+  async addItem(trackedStream, formData) {
+    return await this.authenticatedCall(
+      "post",
+      "scrum/item/add",
+      {
+        data: { trackedStream, formData },
+      },
+      "Item Added"
+    );
+  }
+  async updateItem(trackedStream, formData) {
+    return await this.authenticatedCall(
+      "post",
+      "scrum/item/update",
+      {
+        data: { trackedStream, formData },
+      },
+      "Item Updated"
+    );
+  }
+
+  async taskUpdate(taskId, update) {
+    return await this.authenticatedCall("post", "scrum/item/taskUpdate", {
+      data: { taskId, update },
+    });
+  }
+
+  async deleteItem(itemId) {
+    return await this.authenticatedCall(
+      "delete",
+      `scrum/item/${itemId}`,
+      undefined,
+      "Item Deleted"
+    );
   }
   // async getScrumBoard(trackedStream) {
   //   return {

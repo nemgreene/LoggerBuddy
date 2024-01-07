@@ -2,10 +2,18 @@ import SortableItem from "./SortableItem";
 import React, { useMemo } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Card, CardContent, Grid, Tooltip, Typography } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  Grid,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 
 import {
   SortableContext,
@@ -34,7 +42,12 @@ const CGrid = (props) => (
   </Grid>
 );
 
-export default function Container(props) {
+export default function ScrumContainer(props) {
+  const { accessToken, _id } = useMemo(
+    () => props.client.credentialsProvider(),
+    [props.client]
+  );
+
   const theme = useTheme();
   const {
     setNodeRef,
@@ -47,30 +60,31 @@ export default function Container(props) {
     id: props.id,
     data: {
       type: "Column",
-      items: props.items,
+      tasks: props.tasks,
       column: props.id,
       index: props.index,
     },
+    disabled: accessToken && _id ? false : true,
   });
 
   const itemsIds = useMemo(() => {
-    return props.items.map((item) => item.id);
-  }, [props.items]);
+    return props.tasks.map((item) => item.id);
+  }, [props.tasks]);
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    margin: "5px",
-    maxHeight: "90vh",
+    margin: "0px 5px",
     height: "100%",
+    userSelect: "none",
   };
 
   const containerStyle = {
-    height: "90vh",
     minHeight: "10vh",
     overflowY: "scroll",
     borderRadius: "10px",
-    backgroundColor: props.col.color,
+    height: "100%",
+    backgroundColor: props.col.color + "60",
     padding: (t) => t.spacing(1),
   };
 
@@ -96,7 +110,7 @@ export default function Container(props) {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
-      <Box sx={{ ...containerStyle }}>
+      <Box sx={{ ...containerStyle, height: "fit-content" }}>
         <Box
           sx={{
             display: "flex",
@@ -121,6 +135,7 @@ export default function Container(props) {
               sx={{
                 width: "100%",
                 textOverflow: "ellipsis",
+                cursor: accessToken && _id ? "move" : "auto",
               }}
               variant="h6"
             >
@@ -147,7 +162,12 @@ export default function Container(props) {
                   <Tooltip title="Delete Column">
                     <DeleteIcon
                       fontSize="small"
-                      onClick={() => props.openModal("DeleteColumn")}
+                      onClick={() =>
+                        props.openModal({
+                          name: "DeleteColumn",
+                          data: { ...props.col },
+                        })
+                      }
                     />
                   </Tooltip>
                 </CGrid>
@@ -155,32 +175,53 @@ export default function Container(props) {
             </Box>
           )}
         </Box>
-        <Card
-          sx={{
-            borderRadius: "20px",
-            padding: "0px",
-            width: "100%",
-            // padding: (theme) => `${theme.spacing(2)}`,
-            bgcolor: (theme) => theme.palette.background.paper,
-          }}
-        >
-          <CardContent>
-            <SortableContext
-              items={itemsIds}
-              strategy={verticalListSortingStrategy}
-            >
-              {props.items.map((item) => (
-                <SortableItem
-                  openModal={props.openModal}
-                  key={item.id}
-                  id={item.id}
-                  task={item}
-                  active={props.active}
-                />
-              ))}
-            </SortableContext>
-          </CardContent>
-        </Card>
+        {props.tasks && (
+          <Card
+            sx={{
+              borderRadius: "10px",
+              padding: "0px",
+              width: "100%",
+              // padding: (theme) => `${theme.spacing(2)}`,
+              bgcolor: (theme) => theme.palette.background.paper,
+            }}
+          >
+            <CardContent>
+              <SortableContext
+                items={itemsIds}
+                strategy={verticalListSortingStrategy}
+              >
+                {props.tasks.map((item) => (
+                  <SortableItem
+                    client={props.client}
+                    hoveredComponent={props.hoveredComponent}
+                    setHoveredComponent={props.setHoveredComponent}
+                    openModal={props.openModal}
+                    key={item.id}
+                    id={item.id}
+                    task={item}
+                    active={props.active}
+                    col={props.col}
+                  />
+                ))}
+              </SortableContext>
+            </CardContent>
+          </Card>
+        )}
+        {accessToken && _id && (
+          <Button
+            fullWidth
+            onClick={() => {
+              props.openModal({
+                name: "AddItem",
+                col: { ...props.col },
+              });
+            }}
+            sx={{ color: "white", borderRadius: "10px" }}
+          >
+            <AddCircleIcon sx={{ m: (t) => t.spacing(1) }} />
+            <Typography variant="body2">Add card</Typography>
+          </Button>
+        )}
       </Box>
     </div>
   );

@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 const Scrum = new Schema({
   streamId: { type: ObjectId, required: true },
   columns: [],
-  items: [],
+  tasks: [],
   support: {},
 });
 

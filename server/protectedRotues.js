@@ -33,12 +33,10 @@ router.post("/posts/add", async (req, res) => {
       color: stream.color,
     });
     stream.posts = [...stream.posts, post._id];
-    console.log(stream, req.body.streamId);
     await stream.save();
     await post.save();
     return res.send({ status: 200 });
   } catch (e) {
-    console.log(e, "error");
     return res.send(e);
   }
 });
@@ -87,14 +85,12 @@ router.post("/streams/update", async (req, res) => {
     }
     let stringLinks = links.map((link) => JSON.stringify(link));
 
-    console.log(tags);
     const ret = await Stream.findOneAndUpdate(
       { _id: streamId },
       { streamDescription, dateCreated, tags, links: stringLinks }
     );
     res.status(200).send("Stream Updated");
   } catch (e) {
-    console.log(e);
     res.status(400).send({ error: e.message || "Error Updating Post" });
   }
 });
@@ -115,7 +111,6 @@ router.delete("/posts/:id", async (req, res) => {
     await Post.deleteOne({ _id: req.params.id });
     res.status(200).send();
   } catch (e) {
-    console.log(e);
     res.status(400).send({ error: "Error Deleting post..." });
   }
 });
@@ -139,6 +134,7 @@ router.post("/scrum/add", async (req, res) => {
   await scrum.save();
   res.send(scrum);
 });
+
 router.post("/scrum/column/add", async (req, res) => {
   const {
     trackedStream,
@@ -147,20 +143,160 @@ router.post("/scrum/column/add", async (req, res) => {
 
   const id = new mongoose.Types.ObjectId();
   const ret = await Scrum.findOne({ streamId: trackedStream });
-  ret.columns.push({ id, title: name, color, index: ret.columns.length + 1 });
+  ret.columns.push({ id, title: name, color, index: ret.columns.length });
   await ret.save();
 
   res.send(ret.columns);
 });
-router.post("/scrum/column/update", async (req, res) => {
+router.post("/scrum/column/edit", async (req, res) => {
+  const {
+    trackedStream,
+    _id,
+    formData: { name, color, index },
+  } = req.body;
+
+  const ret = await Scrum.findOne({
+    streamId: new mongoose.Types.ObjectId(trackedStream),
+  });
+  ret.columns = ret.columns.map((v) =>
+    v.id == _id ? { ...v, title: name, color } : { ...v }
+  );
+  await ret.save();
+
+  res.send(ret.columns);
+});
+
+router.delete("/scrum/column/:id", async (req, res) => {
+  const id = req.params.id;
+
+  const ret = await Scrum.findOne({
+    columns: {
+      $elemMatch: {
+        id: new mongoose.Types.ObjectId(id),
+      },
+    },
+  });
+  if (ret) {
+    ret.columns = [...ret.columns]
+      .filter((v) => v.id != id)
+      .map((v, i) => ({ ...v, index: i }));
+    await ret.save();
+    return res.status(200).send(ret);
+  }
+  // return res.status(400).send("No column found");
+});
+
+router.post("/scrum/column/sync", async (req, res) => {
   const { trackedStream, update } = req.body;
 
   const ret = await Scrum.findOneAndUpdate(
     { streamId: trackedStream },
-    { columns: update }
+    {
+      columns: [...update].map((v) => ({
+        ...v,
+        id: new mongoose.Types.ObjectId(v.id),
+      })),
+    }
   );
 
   res.send(ret);
+});
+
+router.post("/scrum/item/add", async (req, res) => {
+  const { trackedStream, formData } = req.body;
+
+  const id = new mongoose.Types.ObjectId().toString();
+  const ret = await Scrum.findOne({ streamId: trackedStream });
+  //if active scrum
+  if (!ret) {
+    return res.status(404).send({ error: "No Scrum Board found..." });
+  }
+  // ret.tasks = [...ret.tasks, ]
+  let issueNumber = ret.tasks.sort((a, b) => {
+    a.issueNumber - b.issueNumber;
+  })[ret.tasks.length - 1]?.issueNumber;
+
+  let index = ret.tasks.sort((a, b) => {
+    a.index - b.index;
+  })[ret.tasks.length - 1]?.index;
+
+  index = !isNaN(index) ? index + 1 : 0;
+  issueNumber = !isNaN(issueNumber) ? issueNumber + 1 : 0;
+
+  ret.tasks.push({ ...formData, index, id, issueNumber });
+  await ret.save();
+  res.send(ret);
+  // res.send(ret.columns);
+});
+
+router.post("/scrum/item/update", async (req, res) => {
+  const { trackedStream, formData } = req.body;
+
+  const ret = await Scrum.findOne({ streamId: trackedStream });
+  //if active scrum
+  if (!ret) {
+    return res.status(404).send({ error: "No Scrum Board found..." });
+  }
+
+  ret.tasks = ret.tasks.map((v) => {
+    if (v.id == formData.id) {
+      return { ...v, id: new mongoose.Types.ObjectId(v.id), ...formData };
+    }
+    return v;
+  });
+
+  await ret.save();
+  res.send(ret);
+  // res.send(ret.columns);
+});
+
+router.post("/scrum/item/taskUpdate", async (req, res) => {
+  const { taskId, update } = req.body;
+  const ret = await Scrum.findOne({
+    tasks: {
+      $elemMatch: {
+        id: taskId,
+      },
+    },
+  });
+  if (ret) {
+    ret.tasks = [...ret.tasks].map((v, i) => {
+      if (v.id == taskId) {
+        updatedItem = {
+          ...v,
+          ...update,
+        };
+        return updatedItem;
+      }
+      return v;
+    });
+    await ret.save();
+    console.log(ret.tasks);
+
+    return res.status(200).send(ret.tasks);
+  }
+  return res.status(400).send({ error: "No item found" });
+});
+
+router.delete("/scrum/item/:id", async (req, res) => {
+  const id = req.params.id;
+
+  const ret = await Scrum.findOne({
+    tasks: {
+      $elemMatch: {
+        id: id,
+      },
+    },
+  });
+  if (ret) {
+    ret.tasks = [...ret.tasks]
+      .filter((v) => v.id != id)
+      .map((v, i) => ({ ...v, index: i }));
+    await ret.save();
+
+    return res.status(200).send(ret);
+  }
+  return res.status(400).send("No item found");
 });
 
 //random cleanup endpoints
@@ -170,7 +306,6 @@ router.delete("/cleanup", async (req, res) => {
   // posts.forEach((post, pI) => {
   //   streams.forEach((stream, sI) => {
   //     if (stream._id.equals(post.streamId)) {
-  //       // console.log(streams[i]);
   //       // streams[i].posts = [...streams[i].posts, post._id];
   //       posts[pI].color = streams[sI].color;
   //       // streams[i].posts = [];
@@ -195,7 +330,6 @@ router.delete("/cleanup", async (req, res) => {
   // posts.forEach((post) => {
   //   streams.forEach((stream, i) => {
   //     if (stream._id.equals(post.streamId)) {
-  //       // console.log(streams[i]);
   //       streams[i].posts = [...streams[i].posts, post._id];
   //       // streams[i].posts = [];
   //       return;

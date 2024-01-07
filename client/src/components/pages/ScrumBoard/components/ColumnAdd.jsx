@@ -4,7 +4,7 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 export default function ColumnAdd({ containerStyle, props }) {
   return (
-    <Card style={{ ...containerStyle, margin: "5px" }}>
+    <Card style={{ ...containerStyle, margin: "0px 5px" }}>
       <Box
         sx={{
           height: "100%",

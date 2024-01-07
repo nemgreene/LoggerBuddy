@@ -3,6 +3,13 @@ import ColorLensIcon from "@mui/icons-material/ColorLens";
 import HomeIcon from "@mui/icons-material/Home";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import { createTheme } from "@mui/material/styles";
+import ChecklistIcon from "@mui/icons-material/Checklist";
+import SubjectIcon from "@mui/icons-material/Subject";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import CommentIcon from "@mui/icons-material/Comment";
+import LabelIcon from "@mui/icons-material/Label";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import {
   red,
   pink,
@@ -21,6 +28,8 @@ import {
   orange,
   deepOrange,
 } from "@mui/material/colors";
+import { styled } from "@mui/system";
+import { Grid } from "@mui/material";
 
 export const sortObj = {
   dateDesc: {
@@ -98,3 +107,61 @@ export const colors = [
   orange[900],
   deepOrange[900],
 ];
+
+export const GridRow = styled(Grid)(({ theme }) => ({
+  padding: `${theme.spacing(2)} 0px`,
+}));
+
+export const GridCap = (props) => (
+  <Grid
+    item
+    xs={1}
+    sx={{
+      display: "flex",
+      justifyContent: "flex-end",
+    }}
+  >
+    {props.children}
+  </Grid>
+);
+export const GridCol = (props) => (
+  <Grid
+    item
+    xs={11}
+    sx={{
+      pl: (t) => t.spacing(2),
+      alignItems: "center",
+      display: "flex",
+      alignContent: "center",
+    }}
+  >
+    {props.children}
+  </Grid>
+);
+
+export const ScrumItemIconDict = {
+  home: (fontSize) => ({
+    title: "Task",
+    icon: <AssignmentIcon fontSize={fontSize} />,
+  }),
+  checklist: (fontSize) => ({
+    title: "Checklist",
+    icon: <ChecklistIcon fontSize={fontSize} />,
+  }),
+  attachments: (fontSize) => ({
+    title: "Attachments",
+    icon: <AttachFileIcon fontSize={fontSize} />,
+  }),
+  comments: (fontSize) => ({
+    title: "Comments",
+    icon: <CommentIcon fontSize={fontSize} />,
+  }),
+  labels: (fontSize) => ({
+    title: "Labels",
+    icon: <LabelIcon fontSize={fontSize} />,
+  }),
+  dates: (fontSize) => ({
+    title: "Dates",
+    icon: <CalendarMonthIcon fontSize={fontSize} />,
+  }),
+};

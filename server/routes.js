@@ -28,7 +28,6 @@ router.get("/streams/headers", async (req, res, next) => {
     res.send(ret);
     return;
   } catch (e) {
-    console.log(e);
     res.send(e);
   }
 });
@@ -82,7 +81,6 @@ router.post("/posts/tagged", async (req, res, next) => {
     }
 
     // const posts = await Post.find(postFilter).sort({ datePosted: -1 });
-    // console.log(taggedStreams);
 
     const postFilter =
       trackedStream.length > 0
@@ -112,14 +110,12 @@ router.post("/posts/tagged", async (req, res, next) => {
       .send({ streams, posts: postsv2.slice(page * 5, page * 5 + 5) });
     return;
   } catch (e) {
-    console.log(e);
     res.send(e);
   }
 });
 
 // router.get("/posts", async (req, res) => {
 //   let page = req.headers.page - 1;
-//   // console.log(new Date(dt).getSeconds());
 //   // dt =
 //   //   dt == 0
 //   //     ? new Date()
@@ -155,11 +151,14 @@ router.post("/login", async (req, res) => {
 router.get("/scrum/:trackedStream", async (req, res) => {
   const { trackedStream } = req.params;
   //verify stream exists
+  const stream = await Stream.findOne({
+    _id: new mongoose.Types.ObjectId(trackedStream),
+  });
   const scrum = await Scrum.findOne({ streamId: trackedStream });
   if (!scrum) {
     return res.status(404).send("No scrum with that id, logging out...");
   }
-  res.send(scrum);
+  res.send({ ...scrum.toObject(), streamName: stream.streamName });
 });
 
 module.exports = router;

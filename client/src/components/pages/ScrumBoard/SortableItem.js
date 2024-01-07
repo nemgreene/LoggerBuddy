@@ -1,20 +1,27 @@
-import { useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button, Card, CardContent, Grid, Typography } from "@mui/material";
 import { Box, styled } from "@mui/system";
 import { useTheme } from "@mui/material/styles";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 
 import ItemIcons from "./ItemIcons";
-// import { Id, Task } from "../types";
-// import TrashIcon from "../icons/TrashIcon";
 
-// https://github.com/Kliton/react-kanban-board-dnd-kit-tutorial-yt/blob/main/src/components/KanbanBoard.tsx
-
-export default function TaskCard({ task, active, openModal, overlay }) {
-  const [mouseIsOver, setMouseIsOver] = useState(false);
-  const [editMode, setEditMode] = useState(true);
-  const theme = useTheme();
+export default function SortableItem({
+  task,
+  overlay,
+  openModal,
+  active,
+  hoveredComponent,
+  setHoveredComponent,
+  col,
+  client,
+}) {
+  const { accessToken, _id } = useMemo(
+    () => client.credentialsProvider(),
+    [client]
+  );
   const {
     setNodeRef,
     attributes,
@@ -28,89 +35,87 @@ export default function TaskCard({ task, active, openModal, overlay }) {
       type: "Task",
       task,
     },
-    disabled: editMode,
+    disabled: accessToken && _id ? false : true,
   });
 
   const style = {
-    transition,
     transform: CSS.Transform.toString(transform),
+    transition,
+    userSelect: "none",
   };
-
-  const ItemCard = styled(Card)(({ theme }) => {
-    return {
-      margin: theme.spacing(1),
-      cursor: "move",
-      borderRadius: "5px",
-      border: isDragging
-        ? `1px solid ${theme.palette.primary.main}`
-        : `1px solid ${theme.palette.primary.main}`,
-    };
-  });
-
-  const toggleEditMode = () => {
-    setEditMode((prev) => !prev);
-    setMouseIsOver(false);
-  };
-  // if (toggle) {
-  //   console.log(task);
-  // }
-
-  if (isDragging || overlay) {
+  if (isDragging) {
     return (
-      <div ref={setNodeRef} style={{ ...style, opacity: 0.5 }}>
-        <ItemCard>
+      <div ref={setNodeRef} style={{ ...style, opacity: 0.5 }} {...attributes}>
+        <Card>
           <CardContent>
             <Grid container>
               <Grid
                 item
                 xs={12}
-                sx={{ paddingBottom: `${theme.spacing(2)} `, opacity: 0 }}
+                sx={{ paddingBottom: (theme) => `${theme.spacing(2)} ` }}
               >
                 {task.title}
               </Grid>
-              <ItemIcons
-                display={true}
-                task={task}
-                active={active}
-                mouseIsOver={mouseIsOver}
-                openModal={openModal}
-              />
+              <ItemIcons task={task} active={true} />
             </Grid>
           </CardContent>
-        </ItemCard>
+        </Card>
+      </div>
+    );
+  }
+  if (overlay) {
+    return (
+      <div ref={setNodeRef} style={{ ...style }} {...attributes}>
+        <Card>
+          <CardContent>
+            <Grid container>
+              <Grid
+                item
+                xs={12}
+                sx={{ paddingBottom: (theme) => `${theme.spacing(2)} ` }}
+              >
+                {task.title}
+              </Grid>
+              <ItemIcons task={task} active={true} />
+            </Grid>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div
-      ref={setNodeRef}
-      style={{ ...style }}
-      {...attributes}
-      {...listeners}
-      onClick={toggleEditMode}
-      onMouseEnter={() => {
-        setMouseIsOver(true);
-      }}
-      onMouseLeave={() => {
-        setMouseIsOver(false);
-      }}
-    >
-      <ItemCard>
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <Card
+        onMouseEnter={() => {
+          setHoveredComponent && setHoveredComponent(task.id);
+        }}
+        onMouseLeave={() => setHoveredComponent && setHoveredComponent(null)}
+      >
         <CardContent>
-          <Grid container>
-            <Grid item xs={12} sx={{ paddingBottom: `${theme.spacing(2)} ` }}>
+          <Grid container sx={{ cursor: "move" }} {...listeners}>
+            <Grid
+              item
+              xs={12}
+              sx={{
+                paddingBottom: (theme) => `${theme.spacing(2)} `,
+                cursor: accessToken && _id ? "move" : "auto",
+              }}
+            >
               {task.title}
             </Grid>
-            <ItemIcons
-              task={task}
-              active={active}
-              mouseIsOver={mouseIsOver}
-              openModal={openModal}
-            />
           </Grid>
+          <ItemIcons
+            client={client}
+            col={col}
+            hoveredComponent={hoveredComponent}
+            task={task}
+            isDragging={isDragging}
+            active={active}
+            openModal={openModal}
+          />
         </CardContent>
-      </ItemCard>
+      </Card>
     </div>
   );
 }

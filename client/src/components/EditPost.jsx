@@ -58,7 +58,6 @@ export default function EditPost({ streamHeaders, client, editPost }) {
     if (formData.streamId == "-1") {
       err.streamId = false;
     }
-    // console.log(err);
     changeFormErrors(err);
     if (JSON.stringify(err).includes("false")) {
       return;
@@ -86,7 +85,6 @@ export default function EditPost({ streamHeaders, client, editPost }) {
       reader.onerror = () => console.log("file reading has failed");
       reader.onload = () => {
         const binaryStr = new Buffer.from(reader.result).toString("base64");
-        console.log(images.length, binaryStr);
         changeImages((p) => (p ? [...p, binaryStr] : [binaryStr]));
       };
       reader.readAsArrayBuffer(fileObject);

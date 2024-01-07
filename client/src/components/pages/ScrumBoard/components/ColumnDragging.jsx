@@ -1,4 +1,4 @@
-import { Card, Typography, CardContent } from "@mui/material";
+import { Card, Typography, CardContent, Button } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 import {
@@ -8,6 +8,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import SortableItem from "../SortableItem";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 export default function ColumnDragging({
   setNodeRef,
@@ -28,25 +29,24 @@ export default function ColumnDragging({
           border: props.active
             ? `1px solid ${theme.palette.primary.main}`
             : "none",
+          height: "fit-content",
           // minHeight: "10px",
         }}
       >
-        {!props.active && (
-          <Typography
-            variant="h6"
-            sx={{
-              padding: (theme) => `${theme.spacing(1)} `,
-              top: (t) => t.spacing(1),
-              left: (t) => t.spacing(2.5),
-              width: "90%",
-              textOverflow: "ellipsis",
-              overflow: "hidden",
-            }}
-          >
-            {props.col.title} {props.col.index}
-          </Typography>
-        )}
-        {!props.active && (
+        <Typography
+          variant="h6"
+          sx={{
+            padding: (theme) => `${theme.spacing(1)} `,
+            top: (t) => t.spacing(1),
+            left: (t) => t.spacing(2.5),
+            width: "90%",
+            textOverflow: "ellipsis",
+            overflow: "hidden",
+          }}
+        >
+          {props.col.title} {props.col.index}
+        </Typography>
+        {!props.active && props.col.tasks && (
           <Card
             sx={{
               borderRadius: "20px",
@@ -61,7 +61,7 @@ export default function ColumnDragging({
                 items={itemsIds}
                 strategy={verticalListSortingStrategy}
               >
-                {props.items.map((item) => (
+                {props.tasks.map((item) => (
                   <SortableItem
                     overlay={props.active}
                     key={item.id}
@@ -74,6 +74,17 @@ export default function ColumnDragging({
             </CardContent>
           </Card>
         )}
+        <Button
+          fullWidth
+          sx={{
+            color: "white",
+            borderRadius: "10px",
+            opacity: props.active ? 0 : 1,
+          }}
+        >
+          <AddCircleIcon sx={{ m: (t) => t.spacing(1) }} />
+          <Typography variant="body2">Add card</Typography>
+        </Button>
       </Box>
     </div>
   );

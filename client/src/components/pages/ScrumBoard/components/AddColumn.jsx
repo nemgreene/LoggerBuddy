@@ -15,9 +15,13 @@ export default function AddColumn({
   params: { trackedStream },
   setColumns,
   handleClose,
+  edit,
+  col,
 }) {
-  const [formData, changeFormData] = useState({ name: "", color: "" });
-
+  const [formData, changeFormData] = useState({
+    name: edit ? col.title : "",
+    color: edit ? col.color : "",
+  });
   const handleChange = ({ target }) => {
     changeFormData((p) => ({ ...p, [target.name]: target.value }));
   };
@@ -32,8 +36,13 @@ export default function AddColumn({
       client.modalHandler(400, "Please Choose Color");
       return;
     }
-    // console.log(trackedStream);
-    const res = await client.addColumns(trackedStream, formData);
+
+    let res;
+    if (edit) {
+      res = await client.editColumn(trackedStream, col.id, formData);
+    } else {
+      res = await client.addColumn(trackedStream, formData);
+    }
     if (res.status === 200) {
       changeFormData({ name: "", color: "" });
       handleClose();
