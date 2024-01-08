@@ -172,7 +172,13 @@ export default function ItemView({ task, display, setTasks, client, tasks }) {
               </GridCol>
               <GridCap></GridCap>
               <GridCol>
-                <ItemComments comments={task.comments} />
+                <ItemComments
+                  client={client}
+                  setTasks={setTasks}
+                  display={display}
+                  comments={task.comments}
+                  task={task}
+                />
               </GridCol>
             </GridRow>
           )}

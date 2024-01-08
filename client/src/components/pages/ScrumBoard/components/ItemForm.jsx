@@ -12,7 +12,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { Box, Container } from "@mui/system";
+import { Box, Container, display } from "@mui/system";
 import React, { useEffect, useState } from "react";
 
 import { GridRow, ScrumItemIconDict } from "../../../Utility";
@@ -25,6 +25,7 @@ import CircleIcon from "@mui/icons-material/Circle";
 import ItemFormHome from "./ItemForms/ItemFormHome";
 import DragAndDrop from "../../../DragAndDrop";
 import ItemFormAttachments from "./ItemForms/ItemFormAttachments";
+import ItemFormsComments from "./ItemForms/ItemFormsComments";
 //public item view
 export default function ItemForm({
   edit = undefined,
@@ -53,7 +54,7 @@ export default function ItemForm({
 
   const [images, changeImages] = useState();
   //checklist
-  const [checklist, setChecklist] = useState(add ? [] : task.checklist);
+  const [checklist, setChecklist] = useState(edit ? task.checklist : []);
 
   const [activeForm, changeActiveForm] = useState("home");
   const handleChange = (e) => {
@@ -126,16 +127,29 @@ export default function ItemForm({
     ),
     attachments: (
       <ItemFormAttachments
-        images={images}
-        changeImages={changeImages}
-        editIndex={editIndex}
-        changeEditIndex={changeEditIndex}
+        add={add}
         client={client}
+        images={images}
+        editIndex={editIndex}
         attachments={attachments}
         changeLinks={changeLinks}
+        changeImages={changeImages}
+        changeEditIndex={changeEditIndex}
+        changeForm={changeForm}
       />
     ),
-    comments: <>comments</>,
+    comments: (
+      <ItemFormsComments
+        add={add}
+        task={task}
+        client={client}
+        form={form}
+        setTasks={setTasks}
+        formError={formError}
+        changeForm={changeForm}
+        changeFormErrors={changeFormErrors}
+      />
+    ),
     labels: <>labels</>,
     dates: <>dates</>,
   };
@@ -181,7 +195,7 @@ export default function ItemForm({
             variant="outlined"
             sx={{ m: (t) => `${t.spacing(2)} 0px` }}
           >
-            {edit ? "Submit Changes" : "Add Item"}
+            {edit ? "Submit Changes" : "Add Item To Backlog"}
           </Button>
         </Grid>
         <Grid item xs={6} sx={{ height: "100%", p: (t) => t.spacing(1) }}>
@@ -193,9 +207,9 @@ export default function ItemForm({
               setTasks={setTasks}
               parent={"Item Form"}
               task={{
+                ...form,
                 ...task,
                 columnTitle: col.title,
-                ...form,
                 images,
                 attachments: attachments,
                 title: form.title ? form.title : "Title here...",

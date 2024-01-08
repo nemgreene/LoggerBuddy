@@ -271,7 +271,6 @@ router.post("/scrum/item/taskUpdate", async (req, res) => {
       return v;
     });
     await ret.save();
-    console.log(ret.tasks);
 
     return res.status(200).send(ret.tasks);
   }

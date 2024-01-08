@@ -164,7 +164,7 @@ export default function Pictures({ images, edit }) {
   };
 
   return (
-    <Container>
+    <Box sx={{ width: "100%" }}>
       <Modal
         open={open !== false ? true : false}
         onClose={handleClose}
@@ -176,6 +176,6 @@ export default function Pictures({ images, edit }) {
         </Box>
       </Modal>
       {edit ? <FullImages /> : <CutImages />}
-    </Container>
+    </Box>
   );
 }
