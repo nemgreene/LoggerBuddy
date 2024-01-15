@@ -4,22 +4,26 @@ import {
   CardContent,
   FormLabel,
   Grid,
+  Skeleton,
   TextField,
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { ItemChecklist } from "../ItemChecklist";
+import { Box } from "@mui/system";
+import { FormSkeleton } from "../../../../Utility";
 
 export default function ItemFormChecklist({
   checklist,
-  setTasks,
+  setChecklist,
   formError,
   changeFormErrors,
   client,
   task,
   tasks,
-  add,
-  ...rest
+  edit,
+  editIndex,
+  changeEditIndex,
 }) {
   const [newItem, changeNewItem] = useState({
     id: "",
@@ -30,44 +34,14 @@ export default function ItemFormChecklist({
     if (!newItem.title) {
       changeFormErrors((p) => ({ ...p, checklist: false }));
     } else {
-      if (add) {
-        console.log("in add");
-        setTasks((p) => {
-          return [...p, { ...newItem }];
-        });
-        changeNewItem({
-          id: "",
-          title: "",
-          completed: false,
-        });
-        return;
-      }
-      console.log("in edit");
-      let res = await client.taskUpdate(task.id, {
-        ...task,
-        checklist: [...task.checklist, { ...newItem }],
+      setChecklist((p) => {
+        return [...p, { ...newItem }];
       });
-      console.log(res);
-      if (res.status === 200) {
-        setTasks((p) => {
-          return res.data;
-        });
-      }
-
-      //add to db
-      //get new unique id
-      // //add into posts
-      // setTasks((p) => {
-      //   let up = [...p].map((v) =>
-      //     v.id === task.id
-      //       ? { ...v, checklist: [...checklist, { ...newItem }] }
-      //       : v
-      //   );
-      //   console.log(up, task.id);
-      //   // let ret = [...p].map((v, i) => ({ ...v, index: i }));
-      //   // return [...ret, { ...newItem, index: checklist.length + 1 }];
-      //   return up;
-      // });
+      changeFormErrors((p) => ({
+        ...p,
+        checklist: null,
+        checklistToggle: null,
+      }));
       changeNewItem({
         id: "",
         title: "",
@@ -77,21 +51,29 @@ export default function ItemFormChecklist({
   };
 
   return (
-    <Card>
+    <Card sx={{ width: "100%" }}>
       <CardContent>
         <Grid container>
           <Grid item xs={12}>
-            <Typography variant="h6">Checklist</Typography>
+            <Typography
+              variant="h6"
+              sx={{ textAlign: "center", p: (t) => t.spacing(1) }}
+            >
+              Checklist
+            </Typography>
           </Grid>
           <Grid item xs={12}>
-            <ItemChecklist
-              parent="formChecklist"
-              task={{ ...task, checklist }}
-              tasks={tasks}
-              client={client}
-              setTasks={setTasks}
-              add={add}
-            />
+            {checklist.length > 0 ? (
+              <ItemChecklist
+                parent="formChecklist"
+                task={{ ...task, checklist }}
+                tasks={tasks}
+                client={client}
+                setChecklist={setChecklist}
+              />
+            ) : (
+              <FormSkeleton />
+            )}
           </Grid>
           {!newItem.id && (
             <Grid item xs={12}>
@@ -99,6 +81,7 @@ export default function ItemFormChecklist({
                 fullWidth
                 variant="contained"
                 onClick={() => {
+                  changeFormErrors((p) => ({ ...p, checklistToggle: false }));
                   changeNewItem({
                     id: checklist.length + 1,
                     title: "",
@@ -140,6 +123,7 @@ export default function ItemFormChecklist({
                     value={newItem.title}
                     name="title"
                     onInput={(e) => {
+                      changeFormErrors((p) => ({ ...p, checklist: "" }));
                       changeNewItem((p) => ({ ...p, title: e.target.value }));
                     }}
                   />
@@ -166,6 +150,11 @@ export default function ItemFormChecklist({
                     color="secondary"
                     sx={{ m: (t) => t.spacing(1) }}
                     onClick={() => {
+                      changeFormErrors((p) => ({
+                        ...p,
+                        checklistToggle: "",
+                        checklist: "",
+                      }));
                       changeNewItem({
                         id: "",
                         title: "",

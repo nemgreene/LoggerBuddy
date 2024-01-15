@@ -201,6 +201,17 @@ router.post("/scrum/column/sync", async (req, res) => {
 
   res.send(ret);
 });
+router.post("/scrum/tasks/sync", async (req, res) => {
+  const { trackedStream, update } = req.body;
+  const ret = await Scrum.findOneAndUpdate(
+    { streamId: trackedStream },
+    {
+      tasks: update,
+    }
+  );
+
+  res.send(ret);
+});
 
 router.post("/scrum/item/add", async (req, res) => {
   const { trackedStream, formData } = req.body;

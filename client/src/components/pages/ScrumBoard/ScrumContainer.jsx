@@ -32,7 +32,7 @@ const CGrid = (props) => (
       cursor: "pointer",
       alignItems: "center",
       display: "flex",
-      alignItems: "center",
+      justifyContent: "center",
       flexWrap: "noWrap",
       width: "fit-content",
       // color: (theme) => "#121212;",
@@ -77,14 +77,16 @@ export default function ScrumContainer(props) {
     margin: "0px 5px",
     height: "100%",
     userSelect: "none",
+    position: "relative",
   };
 
   const containerStyle = {
     minHeight: "10vh",
     overflowY: "scroll",
-    borderRadius: "10px",
+    borderRadius: "20px",
     height: "100%",
-    backgroundColor: props.col.color + "60",
+    // backgroundColor: props.col.color + "60",
+    backgroundColor: props.col.color,
     padding: (t) => t.spacing(1),
   };
 
@@ -92,6 +94,21 @@ export default function ScrumContainer(props) {
     return <ColumnAdd containerStyle={containerStyle} props={props} />;
   }
 
+  if (isDragging && props.overlay) {
+    return (
+      <ColumnDragging
+        setNodeRef={setNodeRef}
+        style={style}
+        attributes={attributes}
+        containerStyle={containerStyle}
+        props={props}
+        theme={theme}
+        SortableContext={SortableContext}
+        itemsIds={itemsIds}
+        overlay={true}
+      />
+    );
+  }
   if (isDragging) {
     return (
       <ColumnDragging
@@ -103,7 +120,6 @@ export default function ScrumContainer(props) {
         theme={theme}
         SortableContext={SortableContext}
         itemsIds={itemsIds}
-        active={true}
       />
     );
   }
@@ -122,8 +138,8 @@ export default function ScrumContainer(props) {
               padding: (theme) => `${theme.spacing(1)} `,
               top: (t) => t.spacing(1),
               left: (t) => t.spacing(2.5),
-
-              width: "80%",
+              display: "flex",
+              flexGrow: 1,
               flexWrap: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -139,11 +155,23 @@ export default function ScrumContainer(props) {
               }}
               variant="h6"
             >
-              {props.col.title} {props.col.index}
+              {props.col.title}
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                display: "flex",
+                flexWrap: "no-wrap",
+                whiteSpace: "nowrap",
+                alignItems: "center",
+                opacity: 0.5,
+              }}
+            >
+              {props?.tasks?.length} tasks
             </Typography>
           </Box>
           {props.credentials._id && props.credentials.accessToken && (
-            <Box sx={{ width: "20%" }}>
+            <Box sx={{ width: "20%", maxWidth: "50px" }}>
               <Grid item xs={12} container columns={2} sx={{ height: "100%" }}>
                 <CGrid item xs={1}>
                   <Tooltip
@@ -175,38 +203,47 @@ export default function ScrumContainer(props) {
             </Box>
           )}
         </Box>
-        {props.tasks && (
-          <Card
-            sx={{
-              borderRadius: "10px",
-              padding: "0px",
-              width: "100%",
-              // padding: (theme) => `${theme.spacing(2)}`,
-              bgcolor: (theme) => theme.palette.background.paper,
-            }}
-          >
-            <CardContent>
-              <SortableContext
-                items={itemsIds}
-                strategy={verticalListSortingStrategy}
-              >
-                {props.tasks.map((item) => (
-                  <SortableItem
-                    client={props.client}
-                    hoveredComponent={props.hoveredComponent}
-                    setHoveredComponent={props.setHoveredComponent}
-                    openModal={props.openModal}
-                    key={item.id}
-                    id={item.id}
-                    task={item}
-                    active={props.active}
-                    col={props.col}
-                  />
-                ))}
-              </SortableContext>
-            </CardContent>
-          </Card>
-        )}
+        <Box
+          sx={{
+            height: "fit-content",
+            maxHeight: "70vh",
+            borderRadius: "inherit",
+            overflowY: "scroll",
+          }}
+        >
+          {props.tasks && (
+            <Card
+              sx={{
+                borderRadius: "20px",
+                padding: "0px",
+                width: "100%",
+                // padding: (theme) => `${theme.spacing(2)}`,
+                // bgcolor: (theme) => theme.palette.background.paper,
+              }}
+            >
+              <CardContent>
+                <SortableContext
+                  items={itemsIds}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {props.tasks.map((item) => (
+                    <SortableItem
+                      client={props.client}
+                      hoveredComponent={props.hoveredComponent}
+                      setHoveredComponent={props.setHoveredComponent}
+                      openModal={props.openModal}
+                      key={item.id}
+                      id={item.id}
+                      task={item}
+                      active={props.active}
+                      col={props.col}
+                    />
+                  ))}
+                </SortableContext>
+              </CardContent>
+            </Card>
+          )}
+        </Box>
         {accessToken && _id && (
           <Button
             fullWidth
@@ -216,7 +253,11 @@ export default function ScrumContainer(props) {
                 col: { ...props.col },
               });
             }}
-            sx={{ color: "white", borderRadius: "10px" }}
+            sx={{
+              color: "white",
+              borderRadius: "20px",
+              mt: (theme) => `${theme.spacing(1)} `,
+            }}
           >
             <AddCircleIcon sx={{ m: (t) => t.spacing(1) }} />
             <Typography variant="body2">Add card</Typography>

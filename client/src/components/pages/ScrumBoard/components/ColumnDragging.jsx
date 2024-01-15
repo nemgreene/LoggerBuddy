@@ -1,12 +1,7 @@
-import { Card, Typography, CardContent, Button } from "@mui/material";
+import { Card, Typography, CardContent, Button, Grid } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { verticalListSortingStrategy } from "@dnd-kit/sortable";
 import SortableItem from "../SortableItem";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 
@@ -16,75 +11,105 @@ export default function ColumnDragging({
   attributes,
   containerStyle,
   props,
-  theme,
-  SortableContext,
-  itemsIds,
+  overlay,
 }) {
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <Box
         sx={{
           ...containerStyle,
-          opacity: props.active ? 0.5 : 1,
-          border: props.active
-            ? `1px solid ${theme.palette.primary.main}`
-            : "none",
           height: "fit-content",
-          // minHeight: "10px",
+          opacity: overlay ? 1 : 0.5,
+          border: (t) =>
+            overlay ? "auto" : `1px solid ${t.palette.secondary.main}`,
         }}
       >
-        <Typography
-          variant="h6"
+        <Box
           sx={{
-            padding: (theme) => `${theme.spacing(1)} `,
-            top: (t) => t.spacing(1),
-            left: (t) => t.spacing(2.5),
-            width: "90%",
-            textOverflow: "ellipsis",
-            overflow: "hidden",
+            display: "flex",
+            width: "100%",
           }}
         >
-          {props.col.title} {props.col.index}
-        </Typography>
-        {!props.active && props.col.tasks && (
-          <Card
+          <Box
             sx={{
-              borderRadius: "20px",
-              padding: "0px",
-              width: "100%",
-              // padding: (theme) => `${theme.spacing(2)}`,
-              bgcolor: (theme) => theme.palette.background.paper,
+              padding: (theme) => `${theme.spacing(1)} `,
+              top: (t) => t.spacing(1),
+              left: (t) => t.spacing(2.5),
+
+              display: "flex",
+              flexGrow: 1,
+              flexWrap: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}
           >
-            <CardContent>
-              <SortableContext
-                items={itemsIds}
-                strategy={verticalListSortingStrategy}
-              >
+            <Typography
+              noWrap
+              sx={{
+                width: "100%",
+                textOverflow: "ellipsis",
+              }}
+              variant="h6"
+            >
+              {props.col.title}
+            </Typography>
+          </Box>
+        </Box>
+        <Box
+          sx={{
+            height: "fit-content",
+            maxHeight: "70vh",
+            borderRadius: "inherit",
+            overflowY: "scroll",
+          }}
+        >
+          {props.tasks && (
+            <Card
+              sx={{
+                borderRadius: "10px",
+                padding: "0px",
+                width: "100%",
+                // padding: (theme) => `${theme.spacing(2)}`,
+                // bgcolor: (theme) => theme.palette.background.paper,
+              }}
+            >
+              <CardContent>
                 {props.tasks.map((item) => (
                   <SortableItem
-                    overlay={props.active}
+                    overlay={overlay}
+                    client={props.client}
+                    hoveredComponent={props.hoveredComponent}
+                    setHoveredComponent={props.setHoveredComponent}
+                    openModal={props.openModal}
                     key={item.id}
                     id={item.id}
                     task={item}
                     active={props.active}
+                    col={props.col}
                   />
                 ))}
-              </SortableContext>
-            </CardContent>
-          </Card>
-        )}
-        <Button
-          fullWidth
-          sx={{
-            color: "white",
-            borderRadius: "10px",
-            opacity: props.active ? 0 : 1,
-          }}
-        >
-          <AddCircleIcon sx={{ m: (t) => t.spacing(1) }} />
-          <Typography variant="body2">Add card</Typography>
-        </Button>
+              </CardContent>
+            </Card>
+          )}
+          <Button
+            fullWidth
+            onClick={() => {
+              props.openModal({
+                name: "AddItem",
+                col: { ...props.col },
+              });
+            }}
+            sx={{
+              color: "white",
+              borderRadius: "10px",
+              opacity: 0,
+              mt: (theme) => `${theme.spacing(1)} `,
+            }}
+          >
+            <AddCircleIcon sx={{ m: (t) => t.spacing(1) }} />
+            <Typography variant="body2">Add card</Typography>
+          </Button>
+        </Box>
       </Box>
     </div>
   );

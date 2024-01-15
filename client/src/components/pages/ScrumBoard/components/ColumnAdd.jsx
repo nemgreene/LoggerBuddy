@@ -7,7 +7,7 @@ export default function ColumnAdd({ containerStyle, props }) {
     <Card style={{ ...containerStyle, margin: "0px 5px" }}>
       <Box
         sx={{
-          height: "100%",
+          height: "85vh",
           width: "100%",
           justifyContent: "center",
           display: "flex",
@@ -19,7 +19,12 @@ export default function ColumnAdd({ containerStyle, props }) {
         }}
       >
         <Tooltip title="Add Column">
-          <AddCircleIcon sx={{ opacity: ".25", fontSize: 80 }} />
+          <AddCircleIcon
+            sx={{
+              opacity: ".25",
+              fontSize: 80,
+            }}
+          />
         </Tooltip>
       </Box>
     </Card>

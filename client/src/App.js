@@ -53,14 +53,13 @@ function App() {
   };
 
   const logoutHandler = async () => {
-    // console.log("logging out");
-    // setCredentials({
-    //   accessToken: undefined,
-    //   _id: undefined,
-    // });
-    // localStorage.removeItem("accessToken");
-    // localStorage.removeItem("user_id");
-    // modalHandler(200, "Logged out successful");
+    setCredentials({
+      accessToken: undefined,
+      _id: undefined,
+    });
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user_id");
+    modalHandler(200, "Logged out successful");
   };
 
   const redirectHandler = (url) => {
@@ -87,7 +86,6 @@ function App() {
   };
 
   const loadTaggedData = async (page = 1, reset = false) => {
-    console.log("Loading data");
     if (reset) {
       setPage(1);
       page = 1;
@@ -120,7 +118,6 @@ function App() {
     //setup overhad initialization
     const streamOverhead = await client.getStreamHeaders(index);
     changeStreamHeaders(streamOverhead.data);
-
     //if streams are being tracked, this should updated them as well
     if (trackedStream.length > 0) {
       syncTrackedPosts(changeTrackedStream, streamOverhead.data);

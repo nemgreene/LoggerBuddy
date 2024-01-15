@@ -89,6 +89,7 @@ export default function StreamTable({
                     openEditModal={handleOpen}
                     changeTrackedStream={changeTrackedStream}
                     postObj={{
+                      streamId: v.streamId,
                       h1: `${v.posts} Post${v.posts > 1 ? "s" : ""}`,
                       body: v.streamDescription,
                       h2: "Stream Description: ",
@@ -98,6 +99,7 @@ export default function StreamTable({
                       streamName: v.streamName,
                       images: [],
                       stream: v,
+                      hasScrum: credentials._id && credentials.accessToken,
                     }}
                   ></PostCard>
                 </Grid>

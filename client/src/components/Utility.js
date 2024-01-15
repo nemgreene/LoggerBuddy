@@ -28,9 +28,12 @@ import {
   orange,
   deepOrange,
 } from "@mui/material/colors";
-import { styled } from "@mui/system";
-import { Grid } from "@mui/material";
+import { rgbToHex } from "@material-ui/core";
+import { Box, styled } from "@mui/system";
+import { Grid, Skeleton } from "@mui/material";
+import { darken } from "@material-ui/core/styles";
 
+let theme = createTheme({});
 export const sortObj = {
   dateDesc: {
     // icon: <HistoryIcon />,
@@ -90,26 +93,26 @@ export const syncTrackedPosts = (changeTrackedStream, streamOverhead) => {
 };
 
 export const colors = [
-  red[900],
-  pink[900],
-  purple[900],
-  deepPurple[900],
-  indigo[900],
-  blue[900],
-  lightBlue[900],
-  cyan[900],
-  teal[900],
-  green[900],
-  lightGreen[900],
-  lime[900],
-  yellow[900],
-  amber[900],
-  orange[900],
-  deepOrange[900],
+  darken(red[900], 0.5),
+  darken(pink[900], 0.5),
+  darken(purple[900], 0.5),
+  darken(deepPurple[900], 0.5),
+  darken(indigo[900], 0.5),
+  darken(blue[900], 0.5),
+  darken(lightBlue[900], 0.5),
+  darken(cyan[900], 0.5),
+  darken(teal[900], 0.5),
+  darken(green[900], 0.5),
+  darken(lightGreen[900], 0.5),
+  darken(lime[900], 0.5),
+  darken(yellow[900], 0.5),
+  darken(amber[900], 0.5),
+  darken(orange[900], 0.5),
+  darken(deepOrange[900], 0.5),
 ];
 
 export const GridRow = styled(Grid)(({ theme }) => ({
-  padding: `${theme.spacing(2)} 0px`,
+  padding: `${theme.spacing(1)} 0px`,
 }));
 
 export const GridCap = (props) => (
@@ -165,3 +168,20 @@ export const ScrumItemIconDict = {
     icon: <CalendarMonthIcon fontSize={fontSize} />,
   }),
 };
+
+export const FormSkeleton = () => (
+  <Box
+    sx={{
+      width: "100%",
+      p: (t) =>
+        `${t.spacing(2)} ${t.spacing(2)} ${t.spacing(3)} ${t.spacing(2)}`,
+    }}
+  >
+    <Box sx={{ display: "flex" }}>
+      <Skeleton sx={{ width: "20%" }}></Skeleton>
+      <Box sx={{ width: "10%" }} />
+      <Skeleton sx={{ width: "70%" }}></Skeleton>
+    </Box>
+    <Skeleton></Skeleton>
+  </Box>
+);

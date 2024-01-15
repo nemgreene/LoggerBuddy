@@ -4,17 +4,9 @@ import { GridRow } from "../../../../Utility";
 
 export default function ItemFormHome({ edit, form, formError, handleChange }) {
   return (
-    <Card>
+    <Card sx={{ width: "100%" }}>
       <CardContent>
         <Grid container>
-          <Grid
-            item
-            xs={12}
-            sx={{ p: (t) => t.spacing(2), mb: (t) => t.spacing(2) }}
-          >
-            <Typography variant="h4">{edit ? "Edit" : "Add"} Item</Typography>
-          </Grid>
-
           <GridRow item xs={12} container>
             <TextField
               sx={{ width: "100%" }}

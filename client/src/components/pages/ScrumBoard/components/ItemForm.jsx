@@ -17,26 +17,35 @@ import React, { useEffect, useState } from "react";
 
 import { GridRow, ScrumItemIconDict } from "../../../Utility";
 import ItemView from "./ItemView";
-import StreamLinksTable from "../../../StreamLinksTable";
-import { ItemChecklist } from "./ItemChecklist";
-import Checkbox from "@mui/material/Checkbox";
+
 import ItemFormChecklist from "./ItemForms/ItemFormChecklist";
-import CircleIcon from "@mui/icons-material/Circle";
 import ItemFormHome from "./ItemForms/ItemFormHome";
-import DragAndDrop from "../../../DragAndDrop";
 import ItemFormAttachments from "./ItemForms/ItemFormAttachments";
 import ItemFormsComments from "./ItemForms/ItemFormsComments";
+import DoneAllIcon from "@mui/icons-material/DoneAll";
+import ItemFormNavbar from "./ItemForms/ItemFormNavbar";
+import ItemFormLabels from "./ItemForms/ItemFormLabels";
+import ItemFormDates from "./ItemForms/ItemFormDates";
 //public item view
 export default function ItemForm({
   edit = undefined,
-  add,
   col,
   client,
   setTasks,
   task,
   handleClose,
   tasks,
+  possibleLabels = [],
 }) {
+  const [errorArray, changeErrorArray] = useState([
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+  ]);
   const [form, changeForm] = useState({
     title: edit?.title || "",
     description: edit?.description || "",
@@ -46,17 +55,17 @@ export default function ItemForm({
     attachments: edit?.attachments || [],
     integrations: edit?.integrations || [],
   });
-
-  const [formError, changeFormErrors] = useState({});
   ///attachments
   const [attachments, changeLinks] = useState(edit?.attachments || []);
   const [editIndex, changeEditIndex] = useState();
-
-  const [images, changeImages] = useState();
   //checklist
-  const [checklist, setChecklist] = useState(edit ? task.checklist : []);
+  const [checklist, setChecklist] = useState(edit?.checklist || []);
+
+  const [images, changeImages] = useState(edit?.images || undefined);
+  const [formError, changeFormErrors] = useState({});
 
   const [activeForm, changeActiveForm] = useState("home");
+
   const handleChange = (e) => {
     changeFormErrors((p) => ({ ...p, [e.target.name]: null }));
     changeForm((p) => ({ ...p, [e.target.name]: e.target.value }));
@@ -67,24 +76,26 @@ export default function ItemForm({
     // issueNumber: "", //assigned on submit
     const errors = {};
     ["description", "title"].forEach((v) => {
+      console.log(v);
       if (!form[v]) {
         errors[v] = false;
       }
     });
-    if (JSON.stringify(errors).includes("false") || !isNaN(editIndex)) {
+    if (JSON.stringify(errors).includes("false")) {
       changeFormErrors((p) => ({ ...p, ...errors }));
       client.modalHandler(400, "Please fill out required forms");
       return;
     }
-    //form sufficiently filled, add to db
-
+    // client.modalHandler(200, "Submitting");
+    // form sufficiently filled, add to db
     if (edit) {
       const res = await client.updateItem(col.trackedStream, {
         ...task,
         ...form,
         columnId: col.id,
         attachments: attachments,
-        checklist: task.checklist,
+        images,
+        checklist: checklist,
       });
       if (res.status === 200) {
         setTasks(res.data.tasks);
@@ -95,6 +106,7 @@ export default function ItemForm({
         ...form,
         columnId: col.id,
         attachments: attachments,
+        images,
         checklist: checklist,
       });
       if (res.status === 200) {
@@ -102,6 +114,18 @@ export default function ItemForm({
         handleClose();
       }
     }
+  };
+  const handleNav = (v) => {
+    if (!form.title || !form.description) {
+      return client.modalHandler(400, "Title And Description Required");
+    }
+
+    console.log(formError);
+    if (JSON.stringify(Object.values(formError)).includes("false")) {
+      return client.modalHandler(400, "Please resolve form to proceed");
+    }
+    console.log("navving");
+    changeActiveForm(v);
   };
 
   const activeView = {
@@ -117,17 +141,18 @@ export default function ItemForm({
       <ItemFormChecklist
         task={task}
         tasks={tasks}
-        add={add}
         client={client}
-        checklist={edit ? task.checklist : checklist}
-        setTasks={edit ? setTasks : setChecklist}
+        checklist={checklist}
+        setChecklist={setChecklist}
         formError={formError}
         changeFormErrors={changeFormErrors}
+        editIndex={editIndex}
+        changeEditIndex={changeEditIndex}
       />
     ),
     attachments: (
       <ItemFormAttachments
-        add={add}
+        changeFormErrors={changeFormErrors}
         client={client}
         images={images}
         editIndex={editIndex}
@@ -140,7 +165,6 @@ export default function ItemForm({
     ),
     comments: (
       <ItemFormsComments
-        add={add}
         task={task}
         client={client}
         form={form}
@@ -150,71 +174,120 @@ export default function ItemForm({
         changeFormErrors={changeFormErrors}
       />
     ),
-    labels: <>labels</>,
-    dates: <>dates</>,
+    labels: (
+      <ItemFormLabels
+        form={form}
+        changeForm={changeForm}
+        possibleLabels={possibleLabels}
+      />
+    ),
+    dates: (
+      <ItemFormDates
+        form={form}
+        changeForm={changeForm}
+        client={client}
+        formError={formError}
+        changeFormErrors={changeFormErrors}
+      />
+    ),
   };
 
   return (
-    <Box sx={{ width: "80vw", minHeight: "50vh" }}>
-      {Object.keys(ScrumItemIconDict).map((v, i) => {
-        return (
+    <Box
+      sx={{
+        width: "80vw",
+        minHeight: "55vh",
+        // height: "50vh",
+        display: "relative",
+      }}
+    >
+      <ItemFormNavbar
+        editIndex={editIndex}
+        changeEditIndex={changeEditIndex}
+        activeForm={activeForm}
+        errorArray={errorArray}
+        activeArray={[
+          form.title && form.description,
+          checklist.length > 0,
+          form.attachments.length > 0 || images,
+          form.comments.length > 0,
+          form.labels.length > 0,
+          form.dates.length > 0,
+        ]}
+        changeActiveForm={handleNav}
+      />
+      <Tooltip title={edit ? "Submit Changes" : "Add Task To Backlog"}>
+        <Fab
+          sx={{
+            position: "absolute",
+            bottom: 0,
+            bgcolor: errorArray[errorArray.length - 1] ? "red" : "primary.main",
+            transform: `translate(-120%, 0%)`,
+          }}
+          onClick={() => {
+            handleSubmit();
+          }}
+          size="large"
+        >
+          <DoneAllIcon />
+        </Fab>
+      </Tooltip>
+      <Grid
+        container
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+        }}
+      >
+        <Grid item xs={6} sx={{ width: "100%", height: "90vh" }}>
+          <Typography
+            variant="h5"
+            sx={{ textAlign: "center", p: (t) => t.spacing(1) }}
+          >
+            {edit ? "Edit" : "Add"} Task
+          </Typography>
           <Box
-            key={i}
             sx={{
-              position: "absolute",
-              transform: `translate(-120%, ${i * 120}%)`,
-              color: "primary.dark.contrastText",
+              width: "100%",
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
-              justifyContent: "flex-end",
+              justifyContent: "center",
+              p: (t) => `${t.spacing(2)}`,
             }}
           >
-            {activeForm === v && <CircleIcon fontSize="7" sx={{ mr: "7px" }} />}
-            <Fab
-              sx={{
-                bgcolor:
-                  form[v]?.length > 0 ? "secondary.main" : "primary.main",
-              }}
-              onClick={() => {
-                changeActiveForm(v);
-              }}
-              size="large"
-            >
-              {ScrumItemIconDict[v]("medium").icon}
-            </Fab>
+            {activeView[activeForm]}
           </Box>
-        );
-      })}
-
-      <Grid container>
-        <Grid item xs={6} sx={{ p: (t) => t.spacing(1) }}>
-          {activeView[activeForm]}
-          <Button
-            onClick={handleSubmit}
-            fullWidth
-            variant="outlined"
-            sx={{ m: (t) => `${t.spacing(2)} 0px` }}
-          >
-            {edit ? "Submit Changes" : "Add Item To Backlog"}
-          </Button>
         </Grid>
-        <Grid item xs={6} sx={{ height: "100%", p: (t) => t.spacing(1) }}>
-          <Box sx={{ width: "100%" }}>
+        <Grid
+          item
+          xs={6}
+          sx={{
+            height: "100%",
+            p: (t) => t.spacing(1),
+            maxHeight: "90vh",
+            overflowY: "scroll",
+          }}
+        >
+          <Box sx={{ width: "100%", p: (t) => `${t.spacing(1)}` }}>
             <ItemView
+              col={col}
               tasks={tasks}
               client={client}
               display={true}
               setTasks={setTasks}
               parent={"Item Form"}
               task={{
-                ...form,
                 ...task,
+                ...form,
                 columnTitle: col.title,
                 images,
                 attachments: attachments,
                 title: form.title ? form.title : "Title here...",
                 description: form.description ? form.description : "...",
-                checklist: add ? checklist : task.checklist,
+                checklist: checklist,
               }}
             ></ItemView>
           </Box>

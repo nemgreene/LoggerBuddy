@@ -159,13 +159,15 @@ function ContentCard({
         </Typography>
       </CardContent>
       <CardActions disableSpacing>
-        <Link to={`/scrum/${postObj.streamId}`}>
-          <Tooltip title={"Scrum Board"}>
-            <IconButton aria-label={"Scrum Board"}>
-              <LogoDevIcon />
-            </IconButton>
-          </Tooltip>
-        </Link>
+        {postObj.hasScrum && (
+          <Link to={`/scrum/${postObj.streamId}`}>
+            <Tooltip title={"Scrum Board"}>
+              <IconButton aria-label={"Scrum Board"}>
+                <LogoDevIcon />
+              </IconButton>
+            </Tooltip>
+          </Link>
+        )}
 
         {postObj?.stream?.links.map((v, k) => {
           return (

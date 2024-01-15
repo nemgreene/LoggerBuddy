@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, Typography } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import StreamLinksTable from "../../../../StreamLinksTable";
 import DragAndDrop from "../../../../DragAndDrop";
 import { Buffer } from "buffer";
@@ -13,20 +13,31 @@ export default function ItemFormAttachments({
   client,
   attachments,
   changeLinks,
+  changeFormErrors,
 }) {
   const deleteImage = (id) => {
     let update = [...images];
     update = update.filter((_, i) => i != id);
     if (update.length > 0) {
-      changeImages(update || []);
+      changeImages(update);
     }
-    changeImages();
+    changeImages(undefined);
+    console.log(update);
+  };
+
+  const toggleCheck = (v) => {
+    changeFormErrors((p) => ({ ...p, attachmentToggle: false }));
+    changeEditIndex(v);
+  };
+  const handleSubmit = (v) => {
+    changeLinks(v);
+    console.log("changing");
   };
 
   return (
     <>
       <Card
-        sx={{ mb: (t) => `${t.spacing(2)} ` }}
+        sx={{ mb: (t) => `${t.spacing(2)} `, width: "100%" }}
         onPaste={(e) => {
           if (e.clipboardData.files.length) {
             const fileObject = e.clipboardData.files[0];
@@ -61,7 +72,7 @@ export default function ItemFormAttachments({
           <DragAndDrop images={images} changeImages={changeImages} />
         </CardContent>
       </Card>
-      <Card sx={{ m: (t) => `${t.spacing(2)} 0px` }}>
+      {/* <Card sx={{ m: (t) => `${t.spacing(2)} 0px`, width: "100%" }}>
         <CardContent>
           <Typography
             variant="h6"
@@ -76,12 +87,12 @@ export default function ItemFormAttachments({
           <StreamLinksTable
             links={attachments}
             client={client}
-            changeLinks={changeLinks}
+            changeLinks={handleSubmit}
             editIndex={editIndex}
-            changeEditIndex={changeEditIndex}
+            changeEditIndex={isNaN(editIndex) ? toggleCheck : () => {}}
           />
         </CardContent>
-      </Card>
+      </Card> */}
     </>
   );
 }

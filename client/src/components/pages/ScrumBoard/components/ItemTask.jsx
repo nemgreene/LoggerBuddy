@@ -34,18 +34,7 @@ export function ItemTask(props) {
       }
     );
     //if in add, this needs to be updated to the local state, but not to the db
-    if (props.add) {
-      props.setTasks(up);
-      return;
-    }
-
-    const res = await props.client.taskUpdate(props.task.id, {
-      ...props.task,
-      checklist: up,
-    });
-    if (res.status === 200) {
-      props.setTasks(res.data);
-    }
+    props.setChecklist(up);
   };
   const handleDelete = async (taskId, itemId) => {
     const up = update(
@@ -54,17 +43,7 @@ export function ItemTask(props) {
         $splice: [[props.index, 1]],
       }
     );
-    if (props.add) {
-      props.setTasks(up);
-      return;
-    }
-    const res = await props.client.taskUpdate(props.task.id, {
-      ...props.task,
-      checklist: up,
-    });
-    if (res.status === 200) {
-      props.setTasks(res.data);
-    }
+    props.setChecklist(up);
   };
 
   return (

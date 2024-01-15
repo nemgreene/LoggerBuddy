@@ -239,6 +239,16 @@ export class ApiClient {
   }
 
   //scrumboard Private
+  async addScrum(trackedStream) {
+    return await this.authenticatedCall(
+      "post",
+      "/scrum/add",
+      {
+        data: { trackedStream },
+      },
+      "Scrum Created"
+    );
+  }
   async addColumn(trackedStream, formData) {
     return await this.authenticatedCall(
       "post",
@@ -271,6 +281,11 @@ export class ApiClient {
   //sync server sort order with frontend source of truth
   async updateColumns(trackedStream, update) {
     return await this.authenticatedCall("post", "scrum/column/sync", {
+      data: { trackedStream, update },
+    });
+  }
+  async updateTasks(trackedStream, update) {
+    return await this.authenticatedCall("post", "scrum/tasks/sync", {
       data: { trackedStream, update },
     });
   }

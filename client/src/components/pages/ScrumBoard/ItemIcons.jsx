@@ -3,7 +3,9 @@ import InsertCommentIcon from "@mui/icons-material/InsertComment";
 import ReadMoreIcon from "@mui/icons-material/ReadMore";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Tooltip, Grid, Typography } from "@mui/material";
+import { Tooltip, Grid, Typography, Chip, IconButton } from "@mui/material";
+import { Box } from "@mui/system";
+import { ScrumItemIconDict } from "../../Utility";
 
 export default function ItemIcons({
   task,
@@ -26,42 +28,59 @@ export default function ItemIcons({
         flexWrap: "noWrap",
         width: "fit-content",
         // color: (theme) => "#121212;",
-        opacity: display ? 0 : 1,
+        // opacity: display ? 0 : 1,
       }}
     >
       {props.children}
     </Grid>
   );
 
+  const iconStyle = {
+    m: (t) => `0px ${t.spacing(0.1)}`,
+    alignItems: "center",
+    display: "flex",
+    flexWrap: "noWrap",
+    justifyContent: "center",
+  };
+
   return (
     <Grid container columns={10}>
       <Grid item xs={8}>
-        <Grid item xs={12} container columns={8}>
-          <CGrid>
-            <Tooltip title="View Details">
+        <Grid item xs={12}>
+          <span
+            style={{
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              width: "100%",
+              display: "flex",
+            }}
+          >
+            <Tooltip sx={iconStyle} title="View Details">
               <ReadMoreIcon
+                onClick={() => {
+                  openModal({
+                    name: "ViewItem",
+                    task,
+                    col,
+                  });
+                }}
                 style={{
                   height: "fitContent",
-                }}
-                onClick={() => {
-                  openModal({ name: "ViewItem", task });
+                  cursor: "pointer",
                 }}
               />
             </Tooltip>
-          </CGrid>
-          {task.comments?.length > 0 && (
-            <Tooltip title="Comments">
-              <span
-                style={{
-                  cursor: "pointer",
-                  alignItems: "center",
-                  display: "flex",
-                  alignItems: "center",
-                  flexWrap: "noWrap",
-                  width: "fit-content",
-                }}
-              >
-                <CGrid>
+            {task.comments?.length > 0 && (
+              <Box sx={iconStyle}>
+                <span
+                  style={{
+                    alignItems: "center",
+                    display: "flex",
+                    flexWrap: "noWrap",
+                    width: "fit-content",
+                  }}
+                >
                   <InsertCommentIcon
                     fontSize="tiny"
                     // onClick={() => {
@@ -73,12 +92,25 @@ export default function ItemIcons({
                     sx={{ p: "0 2px" }}
                     fontSize={"small"}
                   >
-                    {task.comments?.length}
+                    {task.comments.length}
                   </Typography>
-                </CGrid>
-              </span>
-            </Tooltip>
-          )}
+                </span>
+              </Box>
+            )}
+            {(task.images?.length > 0 || task.attachments.length > 0) && (
+              <Box sx={iconStyle}>
+                {ScrumItemIconDict.attachments("tiny").icon}
+              </Box>
+            )}
+            {task.checklist?.length > 0 && (
+              <Box sx={iconStyle}>
+                {ScrumItemIconDict.checklist("tiny").icon}
+              </Box>
+            )}
+            {/* {task.dates?.length > 0 && (
+              <Box sx={iconStyle}>{ScrumItemIconDict.dates("tiny").icon}</Box>
+            )} */}
+          </span>
         </Grid>
       </Grid>
       {hoveredComponent === task.id &&

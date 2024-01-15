@@ -70,22 +70,7 @@ export default function BioDrawer({ client, credentials }) {
       alignContent={"start"}
       style={{ width: "100%", height: "90%" }}
     >
-      <Grid item container justifyContent={"center"} xs={2}>
-        {/* <Slider
-          aria-label="Temperature"
-          defaultValue={1}
-          color="info"
-          value={value}
-          onChange={handleChange}
-          orientation="vertical"
-          // getAriaValueText={valuetext}
-          valueLabelDisplay="auto"
-          step={1}
-          marks
-          min={1}
-          max={24}
-        /> */}
-      </Grid>
+      <Grid item container justifyContent={"center"} xs={2}></Grid>
       <Grid
         item
         container
@@ -93,20 +78,6 @@ export default function BioDrawer({ client, credentials }) {
         style={{ overflow: "hidden", height: "25%" }}
         justifyContent={"center"}
       >
-        {/* <div
-          style={{
-            overflow: "hidden",
-            height: "100%",
-            width: "100%",
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "auto",
-            backgroundPosition: "center",
-            backgroundImage: `url(${GalleryArr[value - 1]})`,
-            borderRadius: "10px",
-            cursor: "pointer",
-          }}
-          alt=""
-        /> */}
         <Grid
           item
           style={{

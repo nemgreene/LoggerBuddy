@@ -23,15 +23,7 @@ export default function ItemComments({
         $splice: [[commentIndex, 1]],
       }
     );
-    if (add) {
-      changeForm((p) => ({ ...p, comments: up }));
-    } else {
-      const ret = { ...task, comments: [...up] };
-      let res = await client.taskUpdate(task.id, ret);
-      if (res.status === 200) {
-        setTasks(res.data);
-      }
-    }
+    changeForm((p) => ({ ...p, comments: up }));
   };
 
   const deleteImage = async (imageIndex, commentIndex) => {
@@ -48,6 +40,7 @@ export default function ItemComments({
           [commentIndex, 1],
           [
             commentIndex,
+            0,
             {
               ...comments[commentIndex],
               images: newImages.length > 0 ? newImages : undefined,
@@ -56,15 +49,7 @@ export default function ItemComments({
         ],
       }
     );
-    if (add) {
-      console.log("deleting image from add");
-    } else {
-      console.log(up);
-      const res = await client.taskUpdate(task.id, { ...task, comments: up });
-      if (res.status === 200) {
-        setTasks(res.data);
-      }
-    }
+    changeForm((p) => ({ ...p, comments: up }));
   };
 
   return (

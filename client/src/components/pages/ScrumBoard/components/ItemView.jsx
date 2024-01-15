@@ -2,6 +2,7 @@ import { styled } from "@mui/material/styles";
 import {
   Card,
   CardContent,
+  Chip,
   Grid,
   IconButton,
   LinearProgress,
@@ -20,8 +21,18 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import ImageIcon from "@mui/icons-material/Image";
 import { GridRow, GridCap, GridCol, linkIcons } from "../../../Utility";
 import Pictures from "../../../Pictures";
+import ItemDates from "./ItemDates";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 
-export default function ItemView({ task, display, setTasks, client, tasks }) {
+export default function ItemView({
+  task,
+  display,
+  setTasks,
+  client,
+  tasks,
+  col,
+  edit,
+}) {
   // const [checklist, setItems] = useState(task.checklist || []);
 
   const completed = useMemo(() => {
@@ -42,7 +53,14 @@ export default function ItemView({ task, display, setTasks, client, tasks }) {
   };
 
   return (
-    <Card>
+    <Card
+      sx={{
+        maxHeight: "90vh",
+        overflowY: "scroll",
+        maxWidth: "45vw",
+        width: "100%",
+      }}
+    >
       <CardContent>
         <Grid container>
           <GridRow item xs={12} container>
@@ -51,7 +69,7 @@ export default function ItemView({ task, display, setTasks, client, tasks }) {
             </GridCap>
             <GridCol>
               <Typography variant="h5">{task.title}</Typography>
-              {!display && (
+              {!isNaN(task.issueNumber) && (
                 <Typography
                   variant="h6"
                   sx={{ pl: "7px", opacity: 0.5, fontStyle: "italic" }}
@@ -62,16 +80,72 @@ export default function ItemView({ task, display, setTasks, client, tasks }) {
             </GridCol>
             <GridCap />
             <GridCol>
-              <Header>
-                in list <a>{task.columnTitle}</a>
-              </Header>
+              <Box
+                sx={{
+                  width: "100%",
+                  display: "flex",
+                  p: (t) => `${t.spacing(1)} 0px`,
+                  alignItems: "center",
+                }}
+              >
+                <Header sx={{ flexGrow: 3, height: "100%" }}>
+                  {col && (
+                    <span>
+                      in list <a>{col.title}</a>
+                    </span>
+                  )}
+                </Header>
+                {task.labels.length > 0 && (
+                  <span
+                    style={{
+                      flexGrow: 1,
+                      maxWidth: "60%",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <span>
+                      {task.labels.map((v, i) => (
+                        <Chip
+                          key={i}
+                          sx={{
+                            bgcolor: v.color,
+                            mr: (t) => t.spacing(0.5),
+                          }}
+                          label={v.label}
+                        ></Chip>
+                      ))}
+                    </span>
+                  </span>
+                )}
+                {task.checklist.length > 0 && (
+                  <span
+                    style={{
+                      flexGrow: 1,
+                      maxWidth: "60%",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <span>
+                      {task.labels.map((v, i) => (
+                        <Chip
+                          key={i}
+                          sx={{
+                            bgcolor: v.color,
+                            mr: (t) => t.spacing(0.5),
+                          }}
+                          label={v.label}
+                        ></Chip>
+                      ))}
+                    </span>
+                  </span>
+                )}
+              </Box>
             </GridCol>
           </GridRow>
-          {task.labels.length > 0 && (
-            <Grid item xs={4}>
-              <Typography variant="h6">Lables</Typography>
-            </Grid>
-          )}
 
           {/* description */}
           <GridRow item xs={12} container>
@@ -83,7 +157,13 @@ export default function ItemView({ task, display, setTasks, client, tasks }) {
             </GridCol>
             <GridCap></GridCap>
             <GridCol>
-              <Typography variant="body1">{task.description}</Typography>
+              <Typography
+                style={{ whiteSpace: " pre-line" }}
+                variant="body1"
+                color="text.secondary"
+              >
+                {task.description}
+              </Typography>
             </GridCol>
           </GridRow>
 
@@ -173,12 +253,28 @@ export default function ItemView({ task, display, setTasks, client, tasks }) {
               <GridCap></GridCap>
               <GridCol>
                 <ItemComments
+                  edit={edit}
                   client={client}
                   setTasks={setTasks}
                   display={display}
                   comments={task.comments}
                   task={task}
                 />
+              </GridCol>
+            </GridRow>
+          )}
+          {/* comments */}
+          {task.dates.length > 0 && (
+            <GridRow item xs={12} container>
+              <GridCap>
+                <CalendarMonthIcon />
+              </GridCap>
+              <GridCol>
+                <Header>Dates</Header>
+              </GridCol>
+              <GridCap></GridCap>
+              <GridCol>
+                <ItemDates dates={task.dates} />
               </GridCol>
             </GridRow>
           )}

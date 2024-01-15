@@ -3,6 +3,7 @@ import {
   Card,
   CardContent,
   Grid,
+  Skeleton,
   TextField,
   Typography,
 } from "@mui/material";
@@ -13,6 +14,7 @@ import { Box } from "@mui/system";
 import Pictures from "../../../../Pictures";
 import DragAndDrop from "../../../../DragAndDrop";
 import { Buffer } from "buffer";
+import { FormSkeleton } from "../../../../Utility";
 
 export default function ItemFormsComments({
   client,
@@ -36,34 +38,19 @@ export default function ItemFormsComments({
       changeFormErrors((p) => ({ ...p, comment: false }));
       return;
     }
-    if (add) {
-      //make api call
-      changeForm((p) => ({
-        ...p,
-        comments: [
-          ...p.comments,
-          images.length > 0
-            ? { ...commentForm, date: new Date(), images }
-            : { ...commentForm, date: new Date() },
-        ],
-      }));
-      changeCommentForm({ comment: "" });
-      changeImages([]);
-    } else {
-      console.log("submit from edit");
-      const res = await client.taskUpdate(task.id, {
-        ...task,
-        comments: [
-          ...task.comments,
-          images.length > 0
-            ? { ...commentForm, date: new Date(), images }
-            : { ...commentForm, date: new Date() },
-        ],
-      });
-      if (res.status === 200) {
-        setTasks(res.data);
-      }
-    }
+    //make api call
+    changeForm((p) => ({
+      ...p,
+      comments: [
+        ...p.comments,
+        images.length > 0
+          ? { ...commentForm, date: new Date(), images }
+          : { ...commentForm, date: new Date() },
+      ],
+    }));
+    changeCommentForm({ comment: "" });
+    changeImages([]);
+
     //reset form
     changeCommentForm({ comment: "" });
     changeImages([]);
@@ -78,6 +65,7 @@ export default function ItemFormsComments({
 
   return (
     <Box
+      sx={{ width: "100%" }}
       onPaste={(e) => {
         if (e.clipboardData.files.length) {
           const fileObject = e.clipboardData.files[0];
@@ -107,15 +95,19 @@ export default function ItemFormsComments({
             >
               Comments
             </Typography>
-            <ItemComments
-              task={task}
-              form={form}
-              setTasks={setTasks}
-              client={client}
-              comments={add ? form.comments : task.comments}
-              add={add}
-              changeForm={changeForm}
-            />
+            {form.comments.length > 0 ? (
+              <ItemComments
+                task={task}
+                form={form}
+                setTasks={setTasks}
+                client={client}
+                comments={form.comments}
+                add={add}
+                changeForm={changeForm}
+              />
+            ) : (
+              <FormSkeleton />
+            )}
             <Button
               // onClick={handleSubmit}
               onClick={() => {

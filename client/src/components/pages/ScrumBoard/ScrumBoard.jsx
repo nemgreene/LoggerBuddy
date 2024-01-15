@@ -12,6 +12,7 @@ import ItemView from "./components/ItemView";
 import ItemForm from "./components/ItemForm";
 import ItemDelete from "./components/ItemDelete";
 import ScrumNav from "./ScrumNav";
+import AddScrum from "./components/AddScrum";
 
 const style = {
   position: "absolute",
@@ -19,7 +20,7 @@ const style = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   bgcolor: "background.paper",
-  borderRadius: "10px",
+  borderRadius: "20px",
   boxShadow: 24,
 };
 
@@ -28,12 +29,43 @@ export default function ScrumBoard({ client, credentials }) {
   const params = useParams();
   const handleOpen = (modal) => setOpen(modal);
   const handleClose = () => setOpen(false);
+  const [scrum, setScrum] = useState(false);
 
   const [columns, setColumns] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [streamData, changeStreamData] = useState({});
+  const [possibleLabels, setPossibleLabels] = useState([]);
+
+  const loadScrumBoard = async () => {
+    setColumns([]);
+    setTasks([]);
+    const res = await client.getScrumBoard(params.trackedStream);
+    if (res.status === 200) {
+      const { data } = res;
+      setColumns(data.columns);
+      setTasks(data.tasks);
+      setPossibleLabels(data.labels);
+      changeStreamData({ streamName: data.streamName });
+      setScrum(true);
+      return;
+    }
+    if (res.status == 201) {
+      changeStreamData({ streamName: res.data.streamName });
+      setOpen({ name: "AddScrum" });
+    }
+  };
 
   const modalObj = {
+    AddScrum: (
+      <AddScrum
+        client={client}
+        params={params}
+        handleClose={handleClose}
+        loadScrumBoard={loadScrumBoard}
+        streamData={streamData}
+        setScrum={setScrum}
+      />
+    ),
     AddColumn: (
       <AddColumn
         client={client}
@@ -62,10 +94,9 @@ export default function ScrumBoard({ client, credentials }) {
         handleClose={handleClose}
       />
     ),
-
     AddItem: (
       <ItemForm
-        add={true}
+        possibleLabels={possibleLabels}
         task={{ checklist: [] }}
         setTasks={setTasks}
         col={{ ...open.col, trackedStream: params.trackedStream }}
@@ -77,6 +108,7 @@ export default function ScrumBoard({ client, credentials }) {
     ),
     EditItem: (
       <ItemForm
+        possibleLabels={possibleLabels}
         setTasks={setTasks}
         edit={open.task}
         col={{ ...open.col, trackedStream: params.trackedStream }}
@@ -89,11 +121,14 @@ export default function ScrumBoard({ client, credentials }) {
     ),
     ViewItem: (
       <ItemView
+        display={true}
         parent={"ScrumBoard"}
         tasks={tasks}
         setTasks={setTasks}
         client={client}
-        task={tasks.filter((v) => v.id === open?.task?.id)[0]}
+        open={open}
+        col={{ ...open.col, trackedStream: params.trackedStream }}
+        task={{ ...tasks.filter((v) => v.id === open?.task?.id)[0] }}
         setColumns={setColumns}
         handleClose={handleClose}
       />
@@ -108,15 +143,6 @@ export default function ScrumBoard({ client, credentials }) {
       />
     ),
   };
-  const loadScrumBoard = async () => {
-    setColumns([]);
-    setTasks([]);
-    const { data } = await client.getScrumBoard(params.trackedStream);
-    setColumns(data.columns);
-    setTasks(data.tasks);
-    changeStreamData({ streamName: data.streamName });
-  };
-
   useEffect(() => {
     loadScrumBoard();
   }, []);
@@ -125,25 +151,33 @@ export default function ScrumBoard({ client, credentials }) {
     <div>
       <Modal
         open={open ? true : false}
-        onClose={handleClose}
+        onClose={
+          scrum
+            ? handleClose
+            : () => client.modalHandler(400, "No Scrum found for this project")
+        }
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>{open.name ? modalObj[open.name] : null}</Box>
       </Modal>
-      <ScrumNav streamData={streamData} client={client} />
-      <DndProvider backend={HTML5Backend}>
-        <MultipleContainers
-          credentials={credentials}
-          openModal={handleOpen}
-          columns={columns}
-          tasks={tasks}
-          setColumns={setColumns}
-          setTasks={setTasks}
-          client={client}
-          trackedStream={params.trackedStream}
-        />
-      </DndProvider>
+      {scrum && (
+        <>
+          <ScrumNav streamData={streamData} client={client} />
+          <DndProvider backend={HTML5Backend}>
+            <MultipleContainers
+              credentials={credentials}
+              openModal={handleOpen}
+              columns={columns}
+              tasks={tasks}
+              setColumns={setColumns}
+              setTasks={setTasks}
+              client={client}
+              trackedStream={params.trackedStream}
+            />
+          </DndProvider>
+        </>
+      )}
     </div>
   );
 }

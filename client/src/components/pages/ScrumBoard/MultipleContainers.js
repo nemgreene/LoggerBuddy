@@ -21,6 +21,7 @@ import { Box, styled } from "@mui/system";
 import ScrumContainer from "./ScrumContainer";
 import SortableItem from "./SortableItem";
 import ScrumNav from "./ScrumNav";
+import { Card, CardContent, Typography } from "@mui/material";
 
 export default function MultipleContainers({
   openModal,
@@ -50,7 +51,10 @@ export default function MultipleContainers({
     })
   );
 
-  const colBoxStyle = { width: "22.22vw", height: "100%", minWidth: "300px" };
+  const colBoxStyle = {
+    width: "22.22vw",
+    minWidth: "300px",
+  };
 
   return (
     <Box>
@@ -67,7 +71,6 @@ export default function MultipleContainers({
             flexWrap: "nowrap",
             overflowX: "scroll",
             width: "fit-content",
-            height: "90vh",
             m: "5px 0px",
           }}
         >
@@ -104,6 +107,21 @@ export default function MultipleContainers({
                 openModal={openModal}
                 client={client}
               />
+            </Box>
+          )}
+
+          {(!accessToken || !_id) && tasks.length == 0 && (
+            <Box>
+              <Card sx={{ m: (t) => t.spacing(1), width: "250px" }}>
+                <CardContent>
+                  <Typography>No Scrum Data yet...</Typography>
+                </CardContent>
+              </Card>
+              <Card sx={{ m: (t) => t.spacing(1), width: "250px" }}>
+                <CardContent>
+                  <Typography>Come back soon!</Typography>
+                </CardContent>
+              </Card>
             </Box>
           )}
         </Box>
@@ -178,10 +196,7 @@ export default function MultipleContainers({
     }
   }
 
-  function onDragOver(event) {
-    // if (!accessToken || !_id) {
-    //   return;
-    // }
+  async function onDragOver(event) {
     const { active, over } = event;
     if (!over) return;
 
@@ -195,32 +210,52 @@ export default function MultipleContainers({
 
     if (!isActiveATask) return;
 
-    // Im dropping a Task over another Task
+    //dropping a Task over another Task
     if (isActiveATask && isOverATask) {
-      setTasks((tasks) => {
-        const activeIndex = tasks.findIndex((t) => t.id === activeId);
-        const overIndex = tasks.findIndex((t) => t.id === overId);
+      const activeIndex = tasks.findIndex((t) => t.id === activeId);
+      const overIndex = tasks.findIndex((t) => t.id === overId);
 
-        if (tasks[activeIndex].columnId != tasks[overIndex].columnId) {
-          // Fix introduced after video recording
-          tasks[activeIndex].columnId = tasks[overIndex].columnId;
-          return arrayMove(tasks, activeIndex, overIndex - 1);
+      if (tasks[activeIndex].columnId != tasks[overIndex].columnId) {
+        // Fix introduced
+        tasks[activeIndex].columnId = tasks[overIndex].columnId;
+        const update = arrayMove(tasks, activeIndex, overIndex - 1);
+        setTasks(update);
+
+        const ret = await client.updateTasks(trackedStream, update);
+        if (ret.status !== 200) {
+          client.modalhandler(400, "Sorry, something went wrong...");
+          setTasks(arrayMove(tasks, activeIndex, activeIndex));
         }
+        return;
+      }
 
-        return arrayMove(tasks, activeIndex, overIndex);
-      });
+      const update = arrayMove(tasks, activeIndex, overIndex);
+      setTasks(update);
+
+      const ret = await client.updateTasks(trackedStream, update);
+      if (ret.status !== 200) {
+        client.modalhandler(400, "Sorry, something went wrong...");
+        setTasks(arrayMove(tasks, activeIndex, activeIndex));
+      }
+      return;
     }
 
     const isOverAColumn = over.data.current?.type === "Column";
 
-    // Im dropping a Task over a column
+    // dropping a Task over a column
     if (isActiveATask && isOverAColumn) {
-      setTasks((tasks) => {
-        const activeIndex = tasks.findIndex((t) => t.id === activeId);
+      const temp = [...tasks];
+      const activeIndex = temp.findIndex((t) => t.id === activeId);
+      temp[activeIndex].columnId = overId;
+      const update = arrayMove(tasks, activeIndex, activeIndex);
 
-        tasks[activeIndex].columnId = overId;
-        return arrayMove(tasks, activeIndex, activeIndex);
-      });
+      setTasks(update);
+
+      const ret = await client.updateTasks(trackedStream, update);
+      if (ret.status !== 200) {
+        client.modalhandler(400, "Sorry, something went wrong...");
+        setTasks(arrayMove(tasks, activeIndex, activeIndex));
+      }
     }
   }
 }

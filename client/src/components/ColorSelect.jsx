@@ -10,7 +10,7 @@ export default function ColorSelect({
 }) {
   const [hovered, setHovered] = useState(undefined);
   const data = colors.map((v, i) => {
-    const entry = { value: 1, color: v + "75" };
+    const entry = { value: 1, color: v };
     if (hovered === v || activeColor === v) {
       return {
         ...entry,
