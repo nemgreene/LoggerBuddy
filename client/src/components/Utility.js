@@ -28,10 +28,9 @@ import {
   orange,
   deepOrange,
 } from "@mui/material/colors";
-import { rgbToHex } from "@material-ui/core";
 import { Box, styled } from "@mui/system";
 import { Grid, Skeleton } from "@mui/material";
-import { darken } from "@material-ui/core/styles";
+import { darken } from "@mui/material/styles";
 
 let theme = createTheme({});
 export const sortObj = {
