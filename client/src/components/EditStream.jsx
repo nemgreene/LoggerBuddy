@@ -6,8 +6,9 @@ import { Button, Card, CardContent } from "@mui/material";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import StreamLinksTable from "./StreamLinksTable";
 import moment from "moment";
+
+import StreamLinksTable from "./StreamLinksTable";
 import TagSelect from "./TagSelect";
 
 export default function EditStream({ client, editPost, tags }) {
@@ -45,7 +46,6 @@ export default function EditStream({ client, editPost, tags }) {
       client.modalHandler(400, "Accept changes before Submitting");
       return;
     }
-    // console.log(formData, links);
 
     // //passed checks, submit
     const submit = {

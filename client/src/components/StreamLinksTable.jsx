@@ -135,6 +135,7 @@ export default function StreamLinksTable({
                       <Tooltip title="Delete Link">
                         <DeleteForeverIcon
                           onClick={() => {
+                            changeErr(false);
                             changeLinks((p) => p.filter((v, i) => i !== index));
                           }}
                           sx={{ cursor: "pointer" }}
@@ -225,8 +226,13 @@ export default function StreamLinksTable({
                 color="primary"
                 sx={{ cursor: "pointer" }}
                 onClick={() => {
-                  changeLinks((p) => [...p, {}]);
-                  changeEditIndex(links.length);
+                  if (!isNaN(editIndex)) {
+                    console.log(editIndex);
+                    // if (!isNaN(editIndex)) {
+                    changeLinks((p) => [...p, {}]);
+                    changeEditIndex(links.length);
+                  }
+                  // }
                 }}
               />
             </TableCell>

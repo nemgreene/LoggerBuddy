@@ -14,6 +14,7 @@ import {
   darkTheme,
   syncTrackedPosts,
 } from "./components/Utility";
+import ScrumBoard from "./components/pages/ScrumBoard/ScrumBoard";
 
 // import LoginComponent from "./components/public/LoginComponent";
 // import RegisterCard from "./components/public/RegisterCard";
@@ -52,7 +53,6 @@ function App() {
   };
 
   const logoutHandler = async () => {
-    console.log("logging out");
     setCredentials({
       accessToken: undefined,
       _id: undefined,
@@ -86,7 +86,6 @@ function App() {
   };
 
   const loadTaggedData = async (page = 1, reset = false) => {
-    console.log("Loading data");
     if (reset) {
       setPage(1);
       page = 1;
@@ -119,7 +118,6 @@ function App() {
     //setup overhad initialization
     const streamOverhead = await client.getStreamHeaders(index);
     changeStreamHeaders(streamOverhead.data);
-
     //if streams are being tracked, this should updated them as well
     if (trackedStream.length > 0) {
       syncTrackedPosts(changeTrackedStream, streamOverhead.data);
@@ -179,18 +177,18 @@ function App() {
     loadStreams
   );
 
-  // useEffect(() => {
-  //   const [accessToken, refreshToken, _id] = [
-  //     localStorage.getItem("accessToken"),
-  //     localStorage.getItem("refreshToken"),
-  //     localStorage.getItem("user_id"),
-  //   ];
-  //   if (accessToken && refreshToken) {
-  //     setCredentials((p) => ({ ...p, accessToken, refreshToken, _id }));
-  //   } else {
-  //     navigate("/login");
-  //   }
-  // }, [navigate]);
+  useEffect(() => {
+    const [accessToken, refreshToken, _id] = [
+      localStorage.getItem("accessToken"),
+      localStorage.getItem("refreshToken"),
+      localStorage.getItem("user_id"),
+    ];
+    if (accessToken && refreshToken) {
+      setCredentials((p) => ({ ...p, accessToken, refreshToken, _id }));
+    } else {
+      navigate("/");
+    }
+  }, [navigate]);
 
   return (
     <div className="appContainer">
@@ -252,6 +250,10 @@ function App() {
               />
               // </ProtectedRoute>
             }
+          />
+          <Route
+            path="/scrum/:trackedStream"
+            element={<ScrumBoard client={client} credentials={credentials} />}
           />
           <Route
             path="/admin"

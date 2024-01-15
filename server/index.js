@@ -47,7 +47,6 @@ const authenitcate = async (req, res, next) => {
   if (user.sessionCookie === req.headers.accesstoken) {
     return next();
   } else res.status(404).send({ error: "Invalid Credentials" });
-  // return next();
 };
 
 app.use("/", router);

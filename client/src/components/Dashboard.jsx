@@ -12,61 +12,6 @@ import ArchiveIcon from "@mui/icons-material/Archive";
 import Paper from "@mui/material/Paper";
 import { drawerWidth } from "./Utility";
 
-// const DynamicFooter = styled("div", {
-//   shouldForwardProp: (prop) => prop !== "open",
-// })(({ theme, open }) => {
-//   console.log(theme.palette);
-//   return {
-//     flexGrow: 1,
-//     padding: theme.spacing(3),
-//     transition: theme.transitions.create(["margin", "width"], {
-//       easing: theme.transitions.easing.sharp,
-//       duration: theme.transitions.duration.leavingScreen,
-//     }),
-//     backgroundColor: theme.palette.background.paper,
-//     bottom: 0,
-//     position: "fixed",
-//     zIndex: "1000",
-//     minHeight: "128px",
-//     marginRight: "5%",
-//     ...(open && {
-//       width: `calc(100% - ${drawerWidth}px)`,
-//       transition: theme.transitions.create(["margin", "width"], {
-//         easing: theme.transitions.easing.easeOut,
-//         duration: theme.transitions.duration.enteringScreen,
-//       }),
-//       // marginLeft: `-${drawerWidth}px `,
-//     }),
-//   };
-// });
-// const DynamicFooter = styled("div", {
-//   shouldForwardProp: (prop) => prop !== "open",
-// })(({ theme, open, subheader }) => ({
-//   backgroundColor: subheader
-//     ? theme.palette.info.dark
-//     : theme.palette.grey.dark,
-//   transition: theme.transitions.create(["margin", "width"], {
-//     easing: theme.transitions.easing.sharp,
-//     duration: theme.transitions.duration.leavingScreen,
-//   }),
-//   // backgroundColor: theme.palette.background.paper,
-//   backgroundColor: "red",
-
-//   //     bottom: 0,
-//   //     position: "fixed",
-//   //     zIndex: "1000",
-//   //     minHeight: "128px",
-//   //     marginRight: "5%",
-//   ...(open && {
-//     width: `calc(100% - ${drawerWidth}px)`,
-//     marginLeft: `${drawerWidth}px`,
-//     transition: theme.transitions.create(["margin", "width"], {
-//       easing: theme.transitions.easing.easeOut,
-//       duration: theme.transitions.duration.enteringScreen,
-//     }),
-//   }),
-// }));
-
 export default function Dashboard({
   tags,
   page,

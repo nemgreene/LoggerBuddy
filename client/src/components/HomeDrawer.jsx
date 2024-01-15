@@ -14,7 +14,6 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import BioDrawer from "./BioBar";
 import TagSelect from "./TagSelect";
 import { drawerWidth } from "./Utility";
-import { Container } from "@mui/system";
 import StreamSelect from "./StreamSelect";
 
 export default function HomeDrawer({
@@ -213,7 +212,6 @@ export default function HomeDrawer({
 
                   value={trackedStream}
                   setValue={(e) => {
-                    console.log(e);
                     changeTrackedStream(e);
                   }}
                   label={"Filter posts by Stream..."}

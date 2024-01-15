@@ -15,9 +15,11 @@ import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import AssignmentReturnIcon from "@mui/icons-material/AssignmentReturn";
 import EditIcon from "@mui/icons-material/Edit";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Tooltip } from "@mui/material";
 import Pictures from "./Pictures";
+import LogoDevIcon from "@mui/icons-material/LogoDev";
+import { Link } from "react-router-dom";
 import { linkIcons } from "./Utility";
+import { Tooltip } from "@mui/material";
 
 const style = {
   position: "absolute",
@@ -157,6 +159,16 @@ function ContentCard({
         </Typography>
       </CardContent>
       <CardActions disableSpacing>
+        {postObj.hasScrum && (
+          <Link to={`/scrum/${postObj.streamId}`}>
+            <Tooltip title={"Scrum Board"}>
+              <IconButton aria-label={"Scrum Board"}>
+                <LogoDevIcon />
+              </IconButton>
+            </Tooltip>
+          </Link>
+        )}
+
         {postObj?.stream?.links.map((v, k) => {
           return (
             <Tooltip key={k} title={v.tooltip}>

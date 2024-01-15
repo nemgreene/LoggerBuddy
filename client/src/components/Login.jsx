@@ -19,7 +19,7 @@ export default function LoginComponent({ client }) {
     setFlagged((p) => ({ ...p, [e.target.name]: false }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (redirect = "/admin") => {
     const dict = ["password"];
     const flaggedObj = {};
 
@@ -36,7 +36,7 @@ export default function LoginComponent({ client }) {
     const res = await client.login(formValues);
     if (res.status === 200) {
       client.credentialsManager(res.data.sessionCookie, res.data._id);
-      return client.redirect("/admin");
+      return client.redirect(redirect);
     }
   };
 
@@ -76,12 +76,20 @@ export default function LoginComponent({ client }) {
               />
               <CardActions sx={{ pl: 0, pr: 0 }}>
                 <Button
-                  onClick={handleSubmit}
+                  onClick={() => handleSubmit("/admin")}
                   sx={{ width: 1, p: 1.5 }}
                   variant="contained"
                   color="primary"
                 >
-                  Submit
+                  Admin
+                </Button>
+                <Button
+                  onClick={() => handleSubmit("/")}
+                  sx={{ width: 1, p: 1.5 }}
+                  variant="contained"
+                  color="primary"
+                >
+                  Dash
                 </Button>
               </CardActions>
               <CardActions sx={{ pl: 0, pr: 0 }}>

@@ -29,25 +29,5 @@ export default function TagSelect({ value, setValue, options, label }) {
         />
       )}
     />
-    // <Autocomplete
-    //   value={value || null}
-    //   defaultValue={[]}
-    //   onChange={(event, newValue) => {
-    //     setValue(newValue);
-    //   }}
-    //   renderTags={(value, getTagProps) =>
-    //     value.map((option, index) => (
-    //       <Chip variant="outlined" label={option} {...getTagProps({ index })} />
-    //     ))
-    //   }
-    //   renderInput={(params) => (
-    //     <TextField
-    //       {...params}
-    //       variant="filled"
-    //       label={label || "Select"}
-    //       placeholder="Favorites"
-    //     />
-    //   )}
-    // />
   );
 }

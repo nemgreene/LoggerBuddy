@@ -20,7 +20,6 @@ export default function TagSelect({
       freeSolo
       getOptionLabel={(option) => option.streamName}
       onChange={(event, newValue) => {
-        console.log(newValue);
         setValue(newValue);
       }}
       renderTags={(value, getTagProps) => {
