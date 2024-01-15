@@ -43,11 +43,10 @@ const protectedRouter = require("./protectedRotues");
 const User = require("./models/User");
 
 const authenitcate = async (req, res, next) => {
-  // const user = await User.findOne({ _id: req.headers.userid });
-  // if (user.sessionCookie === req.headers.accesstoken) {
-  //   return next();
-  // } else res.status(404).send({ error: "Invalid Credentials" });
-  return next();
+  const user = await User.findOne({ _id: req.headers.userid });
+  if (user.sessionCookie === req.headers.accesstoken) {
+    return next();
+  } else res.status(404).send({ error: "Invalid Credentials" });
 };
 
 app.use("/", router);
