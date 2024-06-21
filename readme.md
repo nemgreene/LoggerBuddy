@@ -1,4 +1,5 @@
-Personal Blog created to help document my ongoing projects and support development
+##Personal Blog created to help document my ongoing projects and support development
+###[Render Deploy](https://portfolioupdate2024.onrender.com/loggerBuddy)
 
 MERN stack, including Authorization/Authentication. 
 Blog posts support images (stored on MONGO) and text, with CRUD capabilities.
