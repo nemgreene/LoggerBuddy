@@ -11,5 +11,5 @@ Includes a Bespoke Drag and Drop Kanbam Scrum board, supporting images, checklis
 
 #### Mongo, Express, React, Node.js
 
-Client: React-Spring, MaterialUI, Dnd-kit, Axios, Embla-Carousel, React-Dropzone, React-Toastify, Sass, Moment.js, Immutability-helper
+Client: React-Router-Dom, React-Spring, MaterialUI, Dnd-kit, Axios, Embla-Carousel, React-Dropzone, React-Toastify, Sass, Moment.js, Immutability-helper
 Server: Auth/Auth, Mongoose, Cors
