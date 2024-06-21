@@ -1,22 +1,12 @@
-Production/Deployment:
-Api client currently tracks a url variable. In production this should be "/"
+Personal Blog created to help document my ongoing projects and support development
 
-Select the deployment branch from gh
-Root Directory : ./server
-Build Command : npm i && cd ../client && npm i && npm run build
-Start Command : node index.js
+MERN stack, including Authorization/Authentication. 
+Blog posts support images (stored on MONGO) and text, with CRUD capabilities.
+Posts can be filtered by tag or project to help review project milestones specifically, or a general overview of activity.
 
-Environmnet Variables
-MONGO_STRING = "Mongo Connection string"
+Includes a Bespoke Drag and Drop Kanbam Scrum board, supporting images, checklists, links, comments, labels, and deadlines
 
-Dev:
-Api client currently tracks a url variable. In production this should be "http://localhost:5000/"
+Mongo, Express, React, Node.js, dnd-kit, axios, embla carousel, react-dropzone, react-toastify, sass, moment, immutability-helper
 
-./server/.env :
-PORT = 5000
-MONGO_STRING = "Mongo Connection string"
-
-npm run devInstall -- install client/server
-npm run dev -- run client/server concurrently
-
-Current deploy time ~ 3 min
+Client: React-Spring, Drag and Drop, MaterialUI
+Server: Auth/Auth, Mongoose, Cors
